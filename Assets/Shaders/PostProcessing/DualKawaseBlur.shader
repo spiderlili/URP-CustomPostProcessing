@@ -1,15 +1,14 @@
 Shader "PostProcessing/DualKawaseBlur"
 {
 	HLSLINCLUDE
-	#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"  
+	#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 	TEXTURE2D(_MainTex);
 	SAMPLER(sampler_MainTex);
 	
 	CBUFFER_START(UnityPerMaterial)
-    uniform float4 _MainTex_ST;
-    half4 _BaseColor;
 	uniform half _Offset;
+    uniform float4 _MainTex_ST;
 	uniform float4 _MainTex_TexelSize; // x = 1.0/width, y = 1.0/height, z = width, w = height
     CBUFFER_END
 	
@@ -122,6 +121,12 @@ Shader "PostProcessing/DualKawaseBlur"
 	}
 	
 	ENDHLSL
+	
+	Properties
+    {
+    	_MainTex("Main Texture", 2D) = "white"
+    	_Offset("Offset", float) = 0
+    }
 	
 	SubShader
 	{
