@@ -61,8 +61,8 @@ Shader "PostProcessing/DualKawaseBlur"
 		
 		_MainTex_TexelSize *= 0.5;
 		o.uv = uv;
-		o.uv01.xy = uv - _MainTex_TexelSize * float2(1 + _Offset, 1 + _Offset);//top right
-		o.uv01.zw = uv + _MainTex_TexelSize * float2(1 + _Offset, 1 + _Offset);//bottom left
+		o.uv01.xy = uv - _MainTex_TexelSize.xy * float2(1 + _Offset, 1 + _Offset);//top right
+		o.uv01.zw = uv + _MainTex_TexelSize.xy * float2(1 + _Offset, 1 + _Offset);//bottom left
 		o.uv23.xy = uv - float2(_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * float2(1 + _Offset, 1 + _Offset);//top left
 		o.uv23.zw = uv + float2(_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * float2(1 + _Offset, 1 + _Offset);//bottom right
 		
@@ -93,16 +93,17 @@ Shader "PostProcessing/DualKawaseBlur"
 		float2 uv = TRANSFORM_TEX(o.texcoord, _MainTex);
 		
 		_MainTex_TexelSize *= 0.5;
-		_Offset = float2(1 + _Offset, 1 + _Offset);
+		_Offset = 1 + _Offset;
+		// _Offset = float2(1 + _Offset, 1 + _Offset);
 		
 		o.uv01.xy = uv + float2(-_MainTex_TexelSize.x * 2, 0) * _Offset;
 		o.uv01.zw = uv + float2(-_MainTex_TexelSize.x, _MainTex_TexelSize.y) * _Offset;
 		o.uv23.xy = uv + float2(0, _MainTex_TexelSize.y * 2) * _Offset;
-		o.uv23.zw = uv + _MainTex_TexelSize * _Offset;
+		o.uv23.zw = uv + _MainTex_TexelSize.xy * _Offset;
 		o.uv45.xy = uv + float2(_MainTex_TexelSize.x * 2, 0) * _Offset;
 		o.uv45.zw = uv + float2(_MainTex_TexelSize.x, -_MainTex_TexelSize.y) * _Offset;
 		o.uv67.xy = uv + float2(0, -_MainTex_TexelSize.y * 2) * _Offset;
-		o.uv67.zw = uv - _MainTex_TexelSize * _Offset;
+		o.uv67.zw = uv - _MainTex_TexelSize.xy * _Offset;
 		
 		return o;
 	}
