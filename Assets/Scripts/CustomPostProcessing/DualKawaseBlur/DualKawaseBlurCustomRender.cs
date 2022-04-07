@@ -18,7 +18,7 @@ public class DualKawaseBlurCustomRender : ScriptableRendererFeature
 
     public override void Create()
     {
-        customRenderPass = new DualKawaseBlurCustomRenderPass("a");
+        customRenderPass = new DualKawaseBlurCustomRenderPass("dualKawaseBlur");
         customRenderPass.passMat = setting.material;
     }
 
