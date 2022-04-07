@@ -1,3 +1,4 @@
+// Add "using System.Collections" and "using System.Collections.Generic" to make sure it shows up in settings
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Rendering.Universal;
