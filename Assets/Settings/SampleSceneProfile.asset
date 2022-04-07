@@ -51,7 +51,8 @@ MonoBehaviour:
   components:
   - {fileID: 849379129802519247}
   - {fileID: -7011558710299706105}
-  - {fileID: 1279066423161424132}
+  - {fileID: 5359008680059555145}
+  - {fileID: 3284862256893741979}
 --- !u!114 &849379129802519247
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -69,7 +70,7 @@ MonoBehaviour:
   mode:
     m_OverrideState: 1
     m_Value: 2
---- !u!114 &1279066423161424132
+--- !u!114 &3284862256893741979
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -81,6 +82,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a7e55abecee84a168397dcad5eae774, type: 3}
   m_Name: GaussianBlurVolume
   m_EditorClassIdentifier: 
+  active: 0
+  m_AdvancedMode: 0
+  BlurRadius:
+    m_OverrideState: 1
+    m_Value: 2.5
+  Iteration:
+    m_OverrideState: 1
+    m_Value: 5
+  downSample:
+    m_OverrideState: 1
+    m_Value: 1
+--- !u!114 &5359008680059555145
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69d3a364714ea48608d770ce9464206e, type: 3}
+  m_Name: DualKawaseBlurCustomVolume
+  m_EditorClassIdentifier: 
   active: 1
   m_AdvancedMode: 0
   BlurRadius:
@@ -88,7 +112,7 @@ MonoBehaviour:
     m_Value: 3
   Iteration:
     m_OverrideState: 1
-    m_Value: 3
+    m_Value: 5
   downSample:
     m_OverrideState: 1
     m_Value: 1

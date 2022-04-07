@@ -1,54 +1,112 @@
-// Add "using System.Collections" and "using System.Collections.Generic" to make sure it shows up in settings
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.Rendering.Universal;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class DualKawaseBlurCustomRendererFeature : ScriptableRendererFeature
 {
-    // Dual Kawase Blur Shader
-    public Shader dualKawaseBlurShader;
-    
-    // 持有屏幕缓冲RT的句柄
-    private RenderTargetHandle m_CameraColorAttachment;
-    
-    // 持有拷贝目标RT的句柄
-    private RenderTargetHandle m_CameraTransparentColorAttachment;
-
-    // Screen copy Pass: before executing rendering logic of Dual Kawase Blur, need to copy the current screen
-    private DualKawaseBlurCustomRenderPass m_dualKawaseBlurRenderPass;
-    
-    [System.Serializable]
-    public class BlurSetting
-    {
-        public RenderPassEvent Event = RenderPassEvent.AfterRenderingTransparents;
-        public Material material = null;
-
-    }
-
-    public BlurSetting setting = new BlurSetting();
+    DualKawaseBlurPass _dualKawaseBlurPass;
 
     public override void Create()
     {
-        // Initialize screen copy Pass: use passed renderPassEvent to determine when this pass should get executed
-        m_dualKawaseBlurRenderPass = new DualKawaseBlurCustomRenderPass(RenderPassEvent.AfterRenderingTransparents);
-        // m_dualKawaseBlurRenderPass.passMat = setting.material;
-        
-        // 映射到显存中的RT
-        m_CameraColorAttachment.Init("_CameraColorTexture");
-        m_CameraTransparentColorAttachment.Init("_CameraTransparentColorTexture");
-
+        _dualKawaseBlurPass = new DualKawaseBlurPass(RenderPassEvent.BeforeRenderingPostProcessing);
     }
 
-    // Injects one or multiple ScriptableRenderPass in the renderer
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        var src = renderer.cameraColorTarget;
+        _dualKawaseBlurPass.Setup(renderer.cameraColorTarget);
+        renderer.EnqueuePass(_dualKawaseBlurPass);
+    }
+}
+
+public class DualKawaseBlurPass : ScriptableRenderPass
+{
+    static readonly string ProfilerRenderTag = "Dual Kawase Blur";
+    static readonly int MainTexId = Shader.PropertyToID("_MainTex");
+    static readonly int TempTargetId = Shader.PropertyToID("_TempTargetTestBlur");
+    static readonly int FocusPowerId = Shader.PropertyToID("_FocusPower");
+    static readonly int FocusDetailId = Shader.PropertyToID("_FocusDetail");
+    static readonly int FocusScreenPositionId = Shader.PropertyToID("_FocusScreenPosition");
+    static readonly int ReferenceResolutionXId = Shader.PropertyToID("_ReferenceResolutionX");
+    DualKawaseBlurCustomVolume DualKawaseBlur;
+    Material DualKawaseBlurMaterial;
+    RenderTargetIdentifier currentTarget;
+
+    public DualKawaseBlurPass(RenderPassEvent evt)
+    {
+        renderPassEvent = evt;
+        var shader = Shader.Find("PostProcessing/Dual Kawase Blur");
+        if (shader == null)
+        {
+            Debug.LogError("Dual Kawase Blur Shader not found.");
+            return;
+        }
+        DualKawaseBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
+    }
+
+    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+    {
+        if (DualKawaseBlurMaterial == null)
+        {
+            Debug.LogError("Dual Kawase Blur Material not created.");
+            return;
+        }
+
+        if (!renderingData.cameraData.postProcessEnabled) return;
+
+        var stack = VolumeManager.instance.stack;
+        DualKawaseBlur = stack.GetComponent<DualKawaseBlurCustomVolume>();
+        if (DualKawaseBlur == null) { return; }
+        if (!DualKawaseBlur.IsActive()) { return; }
+
+        var cmd = CommandBufferPool.Get(ProfilerRenderTag);
+        Render(cmd, ref renderingData);
+        context.ExecuteCommandBuffer(cmd);
+        CommandBufferPool.Release(cmd);
+    }
+
+    public void Setup(in RenderTargetIdentifier currentTarget)
+    {
+        this.currentTarget = currentTarget;
+    }
+
+    void Render(CommandBuffer cmd, ref RenderingData renderingData)
+    {
+        // Pass in render target
+        ref var cameraData = ref renderingData.cameraData;
+        var source = currentTarget;
+        int destination = TempTargetId;
+
+        // Use int to create Pixelated Box Blur effect similar to the one in MineCraft
+        int w = (int)(cameraData.camera.scaledPixelWidth / DualKawaseBlur.downSample.value);
+        int h = (int)(cameraData.camera.scaledPixelHeight / DualKawaseBlur.downSample.value);
+        DualKawaseBlurMaterial.SetFloat(FocusPowerId, DualKawaseBlur.BlurRadius.value);
+
+        int shaderPass = 0;
+        cmd.SetGlobalTexture(MainTexId, source);
         
-        // renderer.cameraColorTarget is the pipeline rendered image => pass it to pass, set up parameters required by copy screen pass
-        m_dualKawaseBlurRenderPass.Setup(m_CameraColorAttachment.Identifier(), m_CameraTransparentColorAttachment);
+        cmd.GetTemporaryRT(destination, w, h, 0, FilterMode.Point, RenderTextureFormat.Default);
+
+        cmd.Blit(source, destination);
         
-        // Add screen copy Pass to the queue to be executed
-        renderer.EnqueuePass(m_dualKawaseBlurRenderPass);
+        for (int i = 0; i < DualKawaseBlur.Iteration.value; i++)
+        {
+            cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Point, RenderTextureFormat.Default);
+            cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass);
+            cmd.Blit(source, destination);
+            cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass + 1);
+            cmd.Blit(source, destination);
+        }
+        
+        for (int i = 0; i < DualKawaseBlur.Iteration.value; i++)
+        {
+            cmd.GetTemporaryRT(destination, w * 2, h * 2, 0, FilterMode.Point, RenderTextureFormat.Default);
+            cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Bilinear, RenderTextureFormat.Default);
+            cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass);
+            cmd.Blit(source, destination);
+            cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass + 1);
+            cmd.Blit(source, destination);
+        }
+
+        cmd.Blit(destination, destination, DualKawaseBlurMaterial, 0);
     }
 }

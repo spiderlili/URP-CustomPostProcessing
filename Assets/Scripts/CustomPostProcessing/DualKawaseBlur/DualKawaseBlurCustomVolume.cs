@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering;
@@ -8,8 +6,16 @@ using UnityEngine.Rendering;
 [System.Serializable, VolumeComponentMenu("Custom PostProcessing Volumes/Dual Kawase Blur Volume/Dual Kawase Blur Render")]
 public class DualKawaseBlurCustomVolume : VolumeComponent, IPostProcessComponent
 {
-    [Tooltip("The strength of the Dual Kawase Blur filter. ")]
-    public ClampedFloatParameter intensity = new ClampedFloatParameter(0f, 0f, 1f);
-    public bool IsActive() => intensity.value > 0f;
+    [Range(0f, 100f), Tooltip("Blur Radius Intensity")]
+    public FloatParameter BlurRadius = new ClampedFloatParameter(3f, 0f, 10f);
+
+    [Range(0, 10), Tooltip("Blur Iteration Quality")]
+    public IntParameter Iteration = new ClampedIntParameter(5, 0, 10);
+
+    [Range(1, 10), Tooltip("Render Target Downscaling for Blur Depth")]
+    public FloatParameter downSample = new ClampedFloatParameter(1f, 0f, 10f);
+
+    public bool IsActive() => downSample.value > 0f;
+
     public bool IsTileCompatible() => false;
 }
