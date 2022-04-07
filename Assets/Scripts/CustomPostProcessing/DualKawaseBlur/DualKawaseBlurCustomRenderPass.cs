@@ -24,9 +24,14 @@ public class DualKawaseBlurCustomRenderPass : ScriptableRenderPass
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         CommandBuffer cmd = CommandBufferPool.Get(passTag);
-        
-        // Add passMat to passSource, then output to passSource
         cmd.Blit(passSource, passSource, passMat);
+
+        // Find the DualKawaseBlurCustomVolume component, return if it's not enabled or not found 
+        var stack = VolumeManager.instance.stack;
+        DualKawaseBlurCustomVolume customVolume1 = stack.GetComponent<DualKawaseBlurCustomVolume>();
+        if (customVolume1 == null){return;}
+        if (!customVolume1.IsActive())return;
+
         context.ExecuteCommandBuffer(cmd);
         CommandBufferPool.Release(cmd);
     }
