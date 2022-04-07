@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-[System.Serializable, VolumeComponentMenu("Custom PostProcessing Volumes/Gaussian Blur Volume/Gaussian Blur Render")]
-public class GaussianBlurVolume  : VolumeComponent, IPostProcessComponent
+[System.Serializable, VolumeComponentMenu("Custom PostProcessing Volumes/Kawase Blur Volume/Kawase Blur Render")]
+public class KawaseBlurVolume : VolumeComponent, IPostProcessComponent
 {
     [Range(0f, 100f), Tooltip("Blur Radius Intensity")]
     public FloatParameter BlurRadius = new ClampedFloatParameter(3f, 0f, 10f);
@@ -18,4 +18,3 @@ public class GaussianBlurVolume  : VolumeComponent, IPostProcessComponent
 
     public bool IsTileCompatible() => false;
 }
-

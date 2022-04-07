@@ -13,6 +13,25 @@ MonoBehaviour:
   m_Name: NewDualKawaseBlurCustomRendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
+--- !u!114 &-5183279565662770648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8b504e29621e4d899d67c9ed031e0d1, type: 3}
+  m_Name: NewKawaseBlurRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  _renderTargetId: _RenderMetaballsRT
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _blurMaterial: {fileID: 2100000, guid: 51fc92ed105574c75ab327216c1750e2, type: 2}
+  _blurPasses: 1
 --- !u!114 &-1467757360683447255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41,7 +60,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1467757360683447255}
   - {fileID: -7372128702664358220}
-  m_RendererFeatureMap: 298cfffb747aa1ebb4c63a0f01f0b099
+  - {fileID: -5183279565662770648}
+  m_RendererFeatureMap: 298cfffb747aa1ebb4c63a0f01f0b099282a217db24a11b8
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
