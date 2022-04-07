@@ -5,15 +5,16 @@ using UnityEngine.Rendering.Universal;
 public class GaussianBlurVolume  : VolumeComponent, IPostProcessComponent
 {
     [Range(0f, 100f), Tooltip("Blur Radius Intensity")]
-    public FloatParameter BlurRadius = new FloatParameter(4f);
+    public FloatParameter BlurRadius = new ClampedFloatParameter(3f, 0f, 10f);
 
     [Range(0, 10), Tooltip("Blur Iteration Quality")]
-    public IntParameter Iteration = new IntParameter(5);
+    public IntParameter Iteration = new ClampedIntParameter(5, 0, 10);
 
-    [Range(1, 10), Tooltip("Blur Depth")]
-    public FloatParameter downSample = new FloatParameter(1f);
+    [Range(1, 10), Tooltip("Render Target Downscaling for Blur Depth")]
+    public FloatParameter downSample = new ClampedFloatParameter(1f, 0f, 10f);
 
     public bool IsActive() => downSample.value > 0f;
 
     public bool IsTileCompatible() => false;
 }
+

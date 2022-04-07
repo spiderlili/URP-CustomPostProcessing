@@ -4,23 +4,23 @@ using UnityEngine.Rendering.Universal;
 
 public class GaussianBlurRendererFeature : ScriptableRendererFeature
 {
-    TestBlurPass testBlurPass;
+    GaussianBlurPass _gaussianBlurPass;
 
     public override void Create()
     {
-        testBlurPass = new TestBlurPass(RenderPassEvent.BeforeRenderingPostProcessing);
+        _gaussianBlurPass = new GaussianBlurPass(RenderPassEvent.BeforeRenderingPostProcessing);
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        testBlurPass.Setup(renderer.cameraColorTarget);
-        renderer.EnqueuePass(testBlurPass);
+        _gaussianBlurPass.Setup(renderer.cameraColorTarget);
+        renderer.EnqueuePass(_gaussianBlurPass);
     }
 }
 
-public class TestBlurPass : ScriptableRenderPass
+public class GaussianBlurPass : ScriptableRenderPass
 {
-    static readonly string RenderTag = "Gaussian Blur";
+    static readonly string ProfilerRenderTag = "Gaussian Blur";
     static readonly int MainTexId = Shader.PropertyToID("_MainTex");
     static readonly int TempTargetId = Shader.PropertyToID("_TempTargetTestBlur");
     static readonly int FocusPowerId = Shader.PropertyToID("_FocusPower");
@@ -31,7 +31,7 @@ public class TestBlurPass : ScriptableRenderPass
     Material GaussianBlurMaterial;
     RenderTargetIdentifier currentTarget;
 
-    public TestBlurPass(RenderPassEvent evt)
+    public GaussianBlurPass(RenderPassEvent evt)
     {
         renderPassEvent = evt;
         var shader = Shader.Find("PostProcessing/Gaussian Blur");
@@ -58,7 +58,7 @@ public class TestBlurPass : ScriptableRenderPass
         if (GaussianBlur == null) { return; }
         if (!GaussianBlur.IsActive()) { return; }
 
-        var cmd = CommandBufferPool.Get(RenderTag);
+        var cmd = CommandBufferPool.Get(ProfilerRenderTag);
         Render(cmd, ref renderingData);
         context.ExecuteCommandBuffer(cmd);
         CommandBufferPool.Release(cmd);
@@ -76,9 +76,9 @@ public class TestBlurPass : ScriptableRenderPass
         var source = currentTarget;
         int destination = TempTargetId;
 
-        // Use int to create Pixellated Box Blur effect similar to the one in MineCraft
-        var w = (int)(cameraData.camera.scaledPixelWidth / GaussianBlur.downSample.value);
-        var h = (int)(cameraData.camera.scaledPixelHeight / GaussianBlur.downSample.value);
+        // Use int to create Pixelated Box Blur effect similar to the one in MineCraft
+        int w = (int)(cameraData.camera.scaledPixelWidth / GaussianBlur.downSample.value);
+        int h = (int)(cameraData.camera.scaledPixelHeight / GaussianBlur.downSample.value);
         GaussianBlurMaterial.SetFloat(FocusPowerId, GaussianBlur.BlurRadius.value);
 
         int shaderPass = 0;
@@ -87,6 +87,7 @@ public class TestBlurPass : ScriptableRenderPass
         cmd.GetTemporaryRT(destination, w, h, 0, FilterMode.Point, RenderTextureFormat.Default);
 
         cmd.Blit(source, destination);
+        
         for (int i = 0; i < GaussianBlur.Iteration.value; i++)
         {
             cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Point, RenderTextureFormat.Default);
@@ -95,6 +96,7 @@ public class TestBlurPass : ScriptableRenderPass
             cmd.Blit(destination, source, GaussianBlurMaterial, shaderPass + 1);
             cmd.Blit(source, destination);
         }
+        
         for (int i = 0; i < GaussianBlur.Iteration.value; i++)
         {
             cmd.GetTemporaryRT(destination, w * 2, h * 2, 0, FilterMode.Point, RenderTextureFormat.Default);
@@ -104,7 +106,7 @@ public class TestBlurPass : ScriptableRenderPass
             cmd.Blit(destination, source, GaussianBlurMaterial, shaderPass + 1);
             cmd.Blit(source, destination);
         }
-        
+
         cmd.Blit(destination, destination, GaussianBlurMaterial, 0);
     }
 }
