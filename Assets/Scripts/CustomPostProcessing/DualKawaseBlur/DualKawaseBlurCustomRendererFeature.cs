@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.Rendering.Universal;
 using UnityEngine;
 
-public class DualKawaseBlurCustomRender : ScriptableRendererFeature
+public class DualKawaseBlurCustomRendererFeature : ScriptableRendererFeature
 {
     DualKawaseBlurCustomRenderPass customRenderPass;
     [System.Serializable]
