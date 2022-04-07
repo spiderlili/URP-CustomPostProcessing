@@ -56,6 +56,7 @@ MonoBehaviour:
   m_Name: NewDualKawaseBlurCustomRender
   m_EditorClassIdentifier: 
   m_Active: 1
+  dualKawaseBlurShader: {fileID: 0}
   setting:
     Event: 500
     material: {fileID: 0}
