@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering;
 
-[System.Serializable, VolumeComponentMenu("Custom Volume/Dual Kawase Blur Volume/Dual Kawase Blur Render")]
+[System.Serializable, VolumeComponentMenu("Custom PostProcessing Volumes/Dual Kawase Blur Volume/Dual Kawase Blur Render")]
 public class DualKawaseBlurCustomVolume : VolumeComponent, IPostProcessComponent
 {
     [Tooltip("Enable Effect")]

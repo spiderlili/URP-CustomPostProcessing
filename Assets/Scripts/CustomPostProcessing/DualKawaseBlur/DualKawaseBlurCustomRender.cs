@@ -25,7 +25,8 @@ public class DualKawaseBlurCustomRender : ScriptableRendererFeature
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
         var src = renderer.cameraColorTarget;
-        // renderer.cameraColorTarget就是管线渲染出来的图像，将它传给pass
+        
+        // renderer.cameraColorTarget is the pipeline rendered image => pass it to pass
         customRenderPass.Setup(src);
         renderer.EnqueuePass(customRenderPass);
     }
