@@ -20,15 +20,15 @@ public class GaussianBlurRendererFeature : ScriptableRendererFeature
 
 public class TestBlurPass : ScriptableRenderPass
 {
-    static readonly string k_RenderTag = "Render TestBlur Effects";
+    static readonly string RenderTag = "Gaussian Blur";
     static readonly int MainTexId = Shader.PropertyToID("_MainTex");
     static readonly int TempTargetId = Shader.PropertyToID("_TempTargetTestBlur");
     static readonly int FocusPowerId = Shader.PropertyToID("_FocusPower");
     static readonly int FocusDetailId = Shader.PropertyToID("_FocusDetail");
     static readonly int FocusScreenPositionId = Shader.PropertyToID("_FocusScreenPosition");
     static readonly int ReferenceResolutionXId = Shader.PropertyToID("_ReferenceResolutionX");
-    GaussianBlurVolume testBlur;
-    Material testBlurMaterial;
+    GaussianBlurVolume GaussianBlur;
+    Material GaussianBlurMaterial;
     RenderTargetIdentifier currentTarget;
 
     public TestBlurPass(RenderPassEvent evt)
@@ -40,12 +40,12 @@ public class TestBlurPass : ScriptableRenderPass
             Debug.LogError("Gaussian Blur Shader not found.");
             return;
         }
-        testBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
+        GaussianBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
     }
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
-        if (testBlurMaterial == null)
+        if (GaussianBlurMaterial == null)
         {
             Debug.LogError("Gaussian Blur Material not created.");
             return;
@@ -54,11 +54,11 @@ public class TestBlurPass : ScriptableRenderPass
         if (!renderingData.cameraData.postProcessEnabled) return;
 
         var stack = VolumeManager.instance.stack;
-        testBlur = stack.GetComponent<GaussianBlurVolume>();
-        if (testBlur == null) { return; }
-        if (!testBlur.IsActive()) { return; }
+        GaussianBlur = stack.GetComponent<GaussianBlurVolume>();
+        if (GaussianBlur == null) { return; }
+        if (!GaussianBlur.IsActive()) { return; }
 
-        var cmd = CommandBufferPool.Get(k_RenderTag);
+        var cmd = CommandBufferPool.Get(RenderTag);
         Render(cmd, ref renderingData);
         context.ExecuteCommandBuffer(cmd);
         CommandBufferPool.Release(cmd);
@@ -71,36 +71,40 @@ public class TestBlurPass : ScriptableRenderPass
 
     void Render(CommandBuffer cmd, ref RenderingData renderingData)
     {
+        // Pass in render target
         ref var cameraData = ref renderingData.cameraData;
         var source = currentTarget;
         int destination = TempTargetId;
 
-        var w = (int)(cameraData.camera.scaledPixelWidth / testBlur.downSample.value);
-        var h = (int)(cameraData.camera.scaledPixelHeight / testBlur.downSample.value);
-        testBlurMaterial.SetFloat(FocusPowerId, testBlur.BlurRadius.value);
+        // Use int to create Pixellated Box Blur effect similar to the one in MineCraft
+        var w = (int)(cameraData.camera.scaledPixelWidth / GaussianBlur.downSample.value);
+        var h = (int)(cameraData.camera.scaledPixelHeight / GaussianBlur.downSample.value);
+        GaussianBlurMaterial.SetFloat(FocusPowerId, GaussianBlur.BlurRadius.value);
 
         int shaderPass = 0;
         cmd.SetGlobalTexture(MainTexId, source);
+        
         cmd.GetTemporaryRT(destination, w, h, 0, FilterMode.Point, RenderTextureFormat.Default);
 
         cmd.Blit(source, destination);
-        for (int i = 0; i < testBlur.Iteration.value; i++)
+        for (int i = 0; i < GaussianBlur.Iteration.value; i++)
         {
             cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Point, RenderTextureFormat.Default);
-            cmd.Blit(destination, source, testBlurMaterial, shaderPass);
+            cmd.Blit(destination, source, GaussianBlurMaterial, shaderPass);
             cmd.Blit(source, destination);
-            cmd.Blit(destination, source, testBlurMaterial, shaderPass + 1);
+            cmd.Blit(destination, source, GaussianBlurMaterial, shaderPass + 1);
             cmd.Blit(source, destination);
         }
-        for (int i = 0; i < testBlur.Iteration.value; i++)
+        for (int i = 0; i < GaussianBlur.Iteration.value; i++)
         {
             cmd.GetTemporaryRT(destination, w * 2, h * 2, 0, FilterMode.Point, RenderTextureFormat.Default);
-            cmd.Blit(destination, source, testBlurMaterial, shaderPass);
+            cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Bilinear, RenderTextureFormat.Default);
+            cmd.Blit(destination, source, GaussianBlurMaterial, shaderPass);
             cmd.Blit(source, destination);
-            cmd.Blit(destination, source, testBlurMaterial, shaderPass + 1);
+            cmd.Blit(destination, source, GaussianBlurMaterial, shaderPass + 1);
             cmd.Blit(source, destination);
         }
-
-        cmd.Blit(destination, destination, testBlurMaterial, 0);
+        
+        cmd.Blit(destination, destination, GaussianBlurMaterial, 0);
     }
 }
