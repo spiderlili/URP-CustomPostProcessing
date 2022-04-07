@@ -1,4 +1,4 @@
-Shader "PostProcessing/DualKawaseBlur"
+Shader "PostProcessing/Dual Kawase Blur"
 {
 	HLSLINCLUDE
 	#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
