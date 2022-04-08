@@ -53,7 +53,6 @@ MonoBehaviour:
   - {fileID: -7011558710299706105}
   - {fileID: 5359008680059555145}
   - {fileID: 3284862256893741979}
-  - {fileID: 7125721699013933490}
 --- !u!114 &849379129802519247
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -106,18 +105,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69d3a364714ea48608d770ce9464206e, type: 3}
   m_Name: DualKawaseBlurCustomVolume
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   m_AdvancedMode: 0
   BlurRadius:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 1.9
   Iteration:
     m_OverrideState: 1
     m_Value: 10
   downSample:
     m_OverrideState: 1
     m_Value: 1
---- !u!114 &7125721699013933490
+--- !u!114 &7555994816064261409
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -126,17 +125,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f619dd451ab174176a2e20ee171cd9f2, type: 3}
-  m_Name: KawaseBlurVolume
+  m_Script: {fileID: 11500000, guid: 8f6056d773cd04ed986b8f72cd2773de, type: 3}
+  m_Name: DualBlurCustomVolume
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   m_AdvancedMode: 0
   BlurRadius:
-    m_OverrideState: 1
-    m_Value: 4.42
+    m_OverrideState: 0
+    m_Value: 3
   Iteration:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 5
   downSample:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 1

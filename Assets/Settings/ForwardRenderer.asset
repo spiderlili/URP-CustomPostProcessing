@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37faa4231aced4ef88444eb2bd1b9332, type: 3}
   m_Name: NewDualKawaseBlurCustomRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
 --- !u!114 &-5183279565662770648
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,7 +61,8 @@ MonoBehaviour:
   - {fileID: -1467757360683447255}
   - {fileID: -7372128702664358220}
   - {fileID: -5183279565662770648}
-  m_RendererFeatureMap: 298cfffb747aa1ebb4c63a0f01f0b099282a217db24a11b8
+  - {fileID: 5675989925885411066}
+  m_RendererFeatureMap: 298cfffb747aa1ebb4c63a0f01f0b099282a217db24a11b8fa7e18d1c32ac54e
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
@@ -90,3 +91,23 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_AccurateGbufferNormals: 0
+--- !u!114 &5675989925885411066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6095e4158310b437fbe2f77f7dde0ad1, type: 3}
+  m_Name: NewDualBlur
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  setting:
+    passEvent: 500
+    mymat: {fileID: 2100000, guid: ede11ed79e7ca4d4fb9a48e0dc6b2652, type: 2}
+    downsample: 2
+    loop: 2
+    blur: 0.5
+    RenderFetureName: Dual Kawase
