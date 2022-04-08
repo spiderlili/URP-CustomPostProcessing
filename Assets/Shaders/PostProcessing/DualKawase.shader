@@ -4,7 +4,7 @@ Shader "PostProcessing/DualBlur(Kawase)"
   Properties
   {
    [HideInInspector]_MainTex("MainTex",2D)="white"{}
-   //_Blur("Blur",float)=3
+   [HideInInspector]_Blur("Blur",float)=3
   }
 
   SubShader
