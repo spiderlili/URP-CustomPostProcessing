@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f6056d773cd04ed986b8f72cd2773de, type: 3}
   m_Name: DualBlurCustomVolume
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   m_AdvancedMode: 0
   BlurRadius:
     m_OverrideState: 0
