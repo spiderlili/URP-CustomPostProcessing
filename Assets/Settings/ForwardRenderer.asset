@@ -106,8 +106,4 @@ MonoBehaviour:
   m_Active: 1
   setting:
     passEvent: 500
-    mymat: {fileID: 2100000, guid: ede11ed79e7ca4d4fb9a48e0dc6b2652, type: 2}
-    downsample: 2
-    loop: 2
-    blur: 0.5
     RenderFetureName: Dual Kawase

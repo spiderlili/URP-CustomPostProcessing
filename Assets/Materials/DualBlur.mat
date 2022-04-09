@@ -78,7 +78,9 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _Blend: 0
-    - _Blur: 0.5
+    - _Blur: 1
+    - _BlurOffset: 0.8
+    - _BlurRadiusOffset: 3
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0

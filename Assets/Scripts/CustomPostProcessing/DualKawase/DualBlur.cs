@@ -7,10 +7,6 @@ public class DualBlur : ScriptableRendererFeature
     [System.Serializable]public class mysetting//定义一个设置的类
     {
         public RenderPassEvent passEvent = RenderPassEvent.AfterRenderingTransparents;
-        public Material mymat;
-        [Range(1,8)]public int downsample = 2;
-        [Range(2,8)]public int loop = 2;
-        [Range(0.5f,5f)]public float blur = 0.5f;
         public string RenderFetureName = "Dual Kawase";//render feature name
     }
 
@@ -22,7 +18,6 @@ public class DualBlur : ScriptableRendererFeature
         static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         static readonly int TempTargetId = Shader.PropertyToID("_TempTargetDualkawaseBlur");
         static readonly int OffsetId = Shader.PropertyToID("_BlurOffset");
-        public Material passMat = null;
         private RenderTargetIdentifier passSource{get;set;}
         RenderTargetIdentifier buffer1;//RTa1的ID
         RenderTargetIdentifier buffer2;//RTa2的ID
@@ -83,7 +78,7 @@ public class DualBlur : ScriptableRendererFeature
             
             // Set command buffer
             CommandBuffer cmd = CommandBufferPool.Get(ProfilerRenderTag);//定义cmd
-            passMat.SetFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//指定材质参数
+            DualKawaseBlurMaterial.SetFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//指定材质参数
             //cmd.SetGlobalFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//设置模糊,但是我不想全局设置怕影响其他的shader，所以注销它了用上面那个，但是cmd这个性能可能好些？
             RenderTextureDescriptor opaquedesc = renderingData.cameraData.cameraTargetDescriptor;//定义屏幕图像参数结构体
             int width = opaquedesc.width/(int)dualBlurVolume.downSample.value;//第一次降采样是使用的参数，后面就是除2去降采样了
@@ -99,7 +94,7 @@ public class DualBlur : ScriptableRendererFeature
                 int midUp = my_level[t].up; //middle Up ，即间接计算的up工具人ID
                 cmd.GetTemporaryRT(midDown,width,height,0,FilterMode.Bilinear,RenderTextureFormat.ARGB32);//对指定高宽申请RT，每个循环的指定RT都会变小为原来一半
                 cmd.GetTemporaryRT(midUp,width,height,0,FilterMode.Bilinear,RenderTextureFormat.ARGB32);//同上，但是这里申请了并未计算，先把位置霸占了，这样在UP的循环里就不用申请RT了
-                cmd.Blit(LastDown,midDown,passMat,0);//计算down的pass
+                cmd.Blit(LastDown,midDown,DualKawaseBlurMaterial,0);//计算down的pass
                 LastDown = midDown;
                 width = Mathf.Max(width/2,1);//每次循环都降尺寸
                 height = Mathf.Max(height/2,1);
@@ -110,11 +105,11 @@ public class DualBlur : ScriptableRendererFeature
             for(int j = dualBlurVolume.Iteration.value-2; j >= 0; j--)//这里减2是因为第一次已经有了要减去1，但是第一次是直接复制的，所以循环完后还得补一次up
             {
                 int midUp = my_level[j].up;
-                cmd.Blit(lastUp,midUp,passMat,1);//这里直接开干就是因为在down过程中已经把RT的位置霸占好了，这里直接用，不虚
+                cmd.Blit(lastUp,midUp,DualKawaseBlurMaterial,1);//这里直接开干就是因为在down过程中已经把RT的位置霸占好了，这里直接用，不虚
                 lastUp = midUp;
             }
             
-            cmd.Blit(lastUp,passSource,passMat,1);//补一次up，顺便就输出了
+            cmd.Blit(lastUp,passSource,DualKawaseBlurMaterial,1);//补一次up，顺便就输出了
             context.ExecuteCommandBuffer(cmd);//执行命令缓冲区的该命令
             CommandBufferPool.Release(cmd);//释放cmd
             for(int k = 0;k<dualBlurVolume.Iteration.value;k++)//清RT，防止内存泄漏
@@ -131,8 +126,7 @@ public class DualBlur : ScriptableRendererFeature
     {
         m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数
         // TODO: Delete
-        m_dualBlurRenderPass.renderPassEvent  = setting.passEvent;
-        m_dualBlurRenderPass.passMat = setting.mymat;
+        m_dualBlurRenderPass.renderPassEvent = setting.passEvent;
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)//传值到pass里
