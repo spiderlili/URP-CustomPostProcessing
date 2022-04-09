@@ -13,7 +13,7 @@ public class DualBlurCustomVolume : VolumeComponent, IPostProcessComponent
     public IntParameter Iteration = new ClampedIntParameter(2, 1, 10);
 
     [Range(1, 10), Tooltip("Render Target Downscaling for Blur Depth")]
-    public FloatParameter downSample = new ClampedFloatParameter(1f, 0f, 10f);
+    public FloatParameter downSample = new ClampedFloatParameter(1f, 1f, 10f);
 
     public bool IsActive() => downSample.value > 0f;
 

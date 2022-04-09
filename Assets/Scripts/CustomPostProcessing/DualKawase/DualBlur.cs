@@ -23,7 +23,6 @@ public class DualBlur : ScriptableRendererFeature
         static readonly int TempTargetId = Shader.PropertyToID("_TempTargetDualkawaseBlur");
         static readonly int OffsetId = Shader.PropertyToID("_BlurOffset");
         public Material passMat = null;
-        public int passdownsample = 2;//降采样
         private RenderTargetIdentifier passSource{get;set;}
         RenderTargetIdentifier buffer1;//RTa1的ID
         RenderTargetIdentifier buffer2;//RTa2的ID
@@ -87,8 +86,8 @@ public class DualBlur : ScriptableRendererFeature
             passMat.SetFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//指定材质参数
             //cmd.SetGlobalFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//设置模糊,但是我不想全局设置怕影响其他的shader，所以注销它了用上面那个，但是cmd这个性能可能好些？
             RenderTextureDescriptor opaquedesc = renderingData.cameraData.cameraTargetDescriptor;//定义屏幕图像参数结构体
-            int width = opaquedesc.width/passdownsample;//第一次降采样是使用的参数，后面就是除2去降采样了
-            int height = opaquedesc.height/passdownsample;
+            int width = opaquedesc.width/(int)dualBlurVolume.downSample.value;//第一次降采样是使用的参数，后面就是除2去降采样了
+            int height = opaquedesc.height/(int)dualBlurVolume.downSample.value;
             opaquedesc.depthBufferBits = 0;
 
             // Downsampling
@@ -134,7 +133,6 @@ public class DualBlur : ScriptableRendererFeature
         // TODO: Delete
         m_dualBlurRenderPass.renderPassEvent  = setting.passEvent;
         m_dualBlurRenderPass.passMat = setting.mymat;
-        m_dualBlurRenderPass.passdownsample = setting.downsample;
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)//传值到pass里
