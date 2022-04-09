@@ -24,8 +24,6 @@ public class DualBlur : ScriptableRendererFeature
         static readonly int OffsetId = Shader.PropertyToID("_BlurOffset");
         public Material passMat = null;
         public int passdownsample = 2;//降采样
-        public int passloop = 2;//模糊的迭代次数
-        public float passblur = 4;
         private RenderTargetIdentifier passSource{get;set;}
         RenderTargetIdentifier buffer1;//RTa1的ID
         RenderTargetIdentifier buffer2;//RTa2的ID
@@ -86,8 +84,8 @@ public class DualBlur : ScriptableRendererFeature
             
             // Set command buffer
             CommandBuffer cmd = CommandBufferPool.Get(ProfilerRenderTag);//定义cmd
-            passMat.SetFloat("_BlurOffset",passblur);//指定材质参数
-            //cmd.SetGlobalFloat("_Blur",passblur);//设置模糊,但是我不想全局设置怕影响其他的shader，所以注销它了用上面那个，但是cmd这个性能可能好些？
+            passMat.SetFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//指定材质参数
+            //cmd.SetGlobalFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//设置模糊,但是我不想全局设置怕影响其他的shader，所以注销它了用上面那个，但是cmd这个性能可能好些？
             RenderTextureDescriptor opaquedesc = renderingData.cameraData.cameraTargetDescriptor;//定义屏幕图像参数结构体
             int width = opaquedesc.width/passdownsample;//第一次降采样是使用的参数，后面就是除2去降采样了
             int height = opaquedesc.height/passdownsample;
@@ -96,7 +94,7 @@ public class DualBlur : ScriptableRendererFeature
             // Downsampling
             RenderTargetIdentifier LastDown = passSource;//把初始图像作为lastdown的起始图去计算
 
-            for(int t = 0; t < passloop; t++)
+            for(int t = 0; t < dualBlurVolume.Iteration.value; t++)
             {
                 int midDown = my_level[t].down;//middle down ，即间接计算down的工具人ID
                 int midUp = my_level[t].up; //middle Up ，即间接计算的up工具人ID
@@ -109,8 +107,8 @@ public class DualBlur : ScriptableRendererFeature
             }
 
             // Upsampling
-            int lastUp = my_level[passloop-1].down;//把down的最后一次图像当成up的第一张图去计算up
-            for(int j = passloop-2; j >= 0; j--)//这里减2是因为第一次已经有了要减去1，但是第一次是直接复制的，所以循环完后还得补一次up
+            int lastUp = my_level[dualBlurVolume.Iteration.value-1].down;//把down的最后一次图像当成up的第一张图去计算up
+            for(int j = dualBlurVolume.Iteration.value-2; j >= 0; j--)//这里减2是因为第一次已经有了要减去1，但是第一次是直接复制的，所以循环完后还得补一次up
             {
                 int midUp = my_level[j].up;
                 cmd.Blit(lastUp,midUp,passMat,1);//这里直接开干就是因为在down过程中已经把RT的位置霸占好了，这里直接用，不虚
@@ -120,7 +118,7 @@ public class DualBlur : ScriptableRendererFeature
             cmd.Blit(lastUp,passSource,passMat,1);//补一次up，顺便就输出了
             context.ExecuteCommandBuffer(cmd);//执行命令缓冲区的该命令
             CommandBufferPool.Release(cmd);//释放cmd
-            for(int k = 0;k<passloop;k++)//清RT，防止内存泄漏
+            for(int k = 0;k<dualBlurVolume.Iteration.value;k++)//清RT，防止内存泄漏
             {
                cmd.ReleaseTemporaryRT(my_level[k].up);
                cmd.ReleaseTemporaryRT(my_level[k].down);
@@ -132,12 +130,9 @@ public class DualBlur : ScriptableRendererFeature
     
     public override void Create()//进行初始化,这里最先开始
     {
-        // _dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);
+        m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数
         // TODO: Delete
-        m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数,name就是tag
         m_dualBlurRenderPass.renderPassEvent  = setting.passEvent;
-        m_dualBlurRenderPass.passblur = setting.blur;
-        m_dualBlurRenderPass.passloop = setting.loop;
         m_dualBlurRenderPass.passMat = setting.mymat;
         m_dualBlurRenderPass.passdownsample = setting.downsample;
     }
