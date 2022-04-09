@@ -16,7 +16,7 @@ public class DualBlur : ScriptableRendererFeature
 
     public mysetting setting = new mysetting();
 
-    class CustomRenderPass : ScriptableRenderPass
+    class DualBlurRenderPass : ScriptableRenderPass
     {
         public Material passMat = null;
         public int passdownsample = 2;//降采样
@@ -36,7 +36,7 @@ public class DualBlur : ScriptableRendererFeature
         LEVEL[] my_level;
         int maxLevel = 16;//指定一个最大值来限制申请的ID的数量，这里限制到16个，这么多肯定用不完了
 
-        public CustomRenderPass(string name)//构造函数
+        public DualBlurRenderPass(string name)//构造函数
         {
             RenderFetureName = name;
         }
@@ -100,11 +100,11 @@ public class DualBlur : ScriptableRendererFeature
         }
     }
     
-    CustomRenderPass mypass;
+    DualBlurRenderPass mypass;
     
     public override void Create()//进行初始化,这里最先开始
     {
-        mypass = new CustomRenderPass(setting.RenderFetureName);//实例化一下并传参数,name就是tag
+        mypass = new DualBlurRenderPass(setting.RenderFetureName);//实例化一下并传参数,name就是tag
         mypass.renderPassEvent  = setting.passEvent;
         mypass.passblur = setting.blur;
         mypass.passloop = setting.loop;
