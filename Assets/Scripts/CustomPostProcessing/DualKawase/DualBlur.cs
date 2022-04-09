@@ -85,7 +85,7 @@ public class DualBlur : ScriptableRendererFeature
             if (!dualBlurVolume.IsActive()) { return; }
             
             // Set command buffer
-            CommandBuffer cmd = CommandBufferPool.Get(RenderFetureName);//定义cmd
+            CommandBuffer cmd = CommandBufferPool.Get(ProfilerRenderTag);//定义cmd
             passMat.SetFloat("_BlurOffset",passblur);//指定材质参数
             //cmd.SetGlobalFloat("_Blur",passblur);//设置模糊,但是我不想全局设置怕影响其他的shader，所以注销它了用上面那个，但是cmd这个性能可能好些？
             RenderTextureDescriptor opaquedesc = renderingData.cameraData.cameraTargetDescriptor;//定义屏幕图像参数结构体
