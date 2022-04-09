@@ -4,7 +4,7 @@ Shader "PostProcessing/DualBlur(Kawase)"
   Properties
   {
    [HideInInspector]_MainTex("MainTex",2D)="white"{}
-   [HideInInspector]_Blur("Blur Offset",float)=3
+   [HideInInspector]_BlurOffset("Blur Offset",float) = 3
   }
 
   SubShader
@@ -22,7 +22,7 @@ Shader "PostProcessing/DualBlur(Kawase)"
    CBUFFER_START(UnityPerMaterial)
    float4 _MainTex_ST;
    float4 _MainTex_TexelSize;
-   float _Blur;
+   float _BlurOffset;
    CBUFFER_END
 
    TEXTURE2D( _MainTex);
@@ -60,10 +60,10 @@ Shader "PostProcessing/DualBlur(Kawase)"
      v2f_DownSample o;
      o.positionCS=TransformObjectToHClip(i.positionOS.xyz);
      o.texcoord[2].xy=i.texcoord;
-     o.texcoord[0].xy=i.texcoord+float2(1,1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-     o.texcoord[0].zw=i.texcoord+float2(-1,1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-     o.texcoord[1].xy=i.texcoord+float2(1,-1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-     o.texcoord[1].zw=i.texcoord+float2(-1,-1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
+     o.texcoord[0].xy=i.texcoord+float2(1,1)*_MainTex_TexelSize.xy*(1+_BlurOffset)*0.5;
+     o.texcoord[0].zw=i.texcoord+float2(-1,1)*_MainTex_TexelSize.xy*(1+_BlurOffset)*0.5;
+     o.texcoord[1].xy=i.texcoord+float2(1,-1)*_MainTex_TexelSize.xy*(1+_BlurOffset)*0.5;
+     o.texcoord[1].zw=i.texcoord+float2(-1,-1)*_MainTex_TexelSize.xy*(1+_BlurOffset)*0.5;
      return o;
     }
 
@@ -90,14 +90,14 @@ Shader "PostProcessing/DualBlur(Kawase)"
     v2f_UpSample vert(a2v i){
     v2f_UpSample o;
     o.positionCS=TransformObjectToHClip(i.positionOS.xyz);
-    o.texcoord[0].xy=i.texcoord+float2(1,1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-    o.texcoord[0].zw=i.texcoord+float2(-1,1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-    o.texcoord[1].xy=i.texcoord+float2(1,-1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-    o.texcoord[1].zw=i.texcoord+float2(-1,-1)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-    o.texcoord[2].xy=i.texcoord+float2(0,2)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-    o.texcoord[2].zw=i.texcoord+float2(0,-2)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-    o.texcoord[3].xy=i.texcoord+float2(-2,0)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
-    o.texcoord[3].zw=i.texcoord+float2(2,0)*_MainTex_TexelSize.xy*(1+_Blur)*0.5;
+    o.texcoord[0].xy=i.texcoord+float2(1,1)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
+    o.texcoord[0].zw=i.texcoord+float2(-1,1)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
+    o.texcoord[1].xy=i.texcoord+float2(1,-1)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
+    o.texcoord[1].zw=i.texcoord+float2(-1,-1)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
+    o.texcoord[2].xy=i.texcoord+float2(0,2)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
+    o.texcoord[2].zw=i.texcoord+float2(0,-2)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
+    o.texcoord[3].xy=i.texcoord+float2(-2,0)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
+    o.texcoord[3].zw=i.texcoord+float2(2,0)*_MainTex_TexelSize.xy*(1 + _BlurOffset)*0.5;
     return o;
     }
 

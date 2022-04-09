@@ -18,6 +18,10 @@ public class DualBlur : ScriptableRendererFeature
 
     class DualBlurRenderPass : ScriptableRenderPass
     {
+        static readonly string ProfilerRenderTag = "Dual Blur";
+        static readonly int MainTexId = Shader.PropertyToID("_MainTex");
+        static readonly int TempTargetId = Shader.PropertyToID("_TempTargetDualkawaseBlur");
+        static readonly int OffsetId = Shader.PropertyToID("_BlurOffset");
         public Material passMat = null;
         public int passdownsample = 2;//降采样
         public int passloop = 2;//模糊的迭代次数
@@ -26,6 +30,8 @@ public class DualBlur : ScriptableRendererFeature
         RenderTargetIdentifier buffer1;//RTa1的ID
         RenderTargetIdentifier buffer2;//RTa2的ID
         string RenderFetureName;
+        Material DualKawaseBlurMaterial;
+        private DualBlurCustomVolume dualBlurVolume;
 
         struct LEVEL
         {
@@ -36,9 +42,16 @@ public class DualBlur : ScriptableRendererFeature
         LEVEL[] my_level;
         int maxLevel = 16;//指定一个最大值来限制申请的ID的数量，这里限制到16个，这么多肯定用不完了
 
-        public DualBlurRenderPass(string name)//构造函数
+        public DualBlurRenderPass(RenderPassEvent evt)//构造函数
         {
-            RenderFetureName = name;
+            renderPassEvent = evt;
+            var shader = Shader.Find("PostProcessing/DualBlur(Kawase)");
+            if (shader == null)
+            {
+                Debug.LogError("Dual Kawase Blur Shader not found.");
+                return;
+            }
+            DualKawaseBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
         }
 
         public void setup(RenderTargetIdentifier sour)//初始化，接收render feather传的图
@@ -57,8 +70,23 @@ public class DualBlur : ScriptableRendererFeature
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)//执行
         {
+            // Debug warning
+            if (DualKawaseBlurMaterial == null)
+            {
+                Debug.LogError("Dual Kawase Blur Material not created.");
+                return;
+            }
+            if (!renderingData.cameraData.postProcessEnabled) return;
+            
+            // Get volume
+            var stack = VolumeManager.instance.stack;
+            dualBlurVolume = stack.GetComponent<DualBlurCustomVolume>();
+            if (dualBlurVolume == null) { return; }
+            if (!dualBlurVolume.IsActive()) { return; }
+            
+            // Set command buffer
             CommandBuffer cmd = CommandBufferPool.Get(RenderFetureName);//定义cmd
-            passMat.SetFloat("_Blur",passblur);//指定材质参数
+            passMat.SetFloat("_BlurOffset",passblur);//指定材质参数
             //cmd.SetGlobalFloat("_Blur",passblur);//设置模糊,但是我不想全局设置怕影响其他的shader，所以注销它了用上面那个，但是cmd这个性能可能好些？
             RenderTextureDescriptor opaquedesc = renderingData.cameraData.cameraTargetDescriptor;//定义屏幕图像参数结构体
             int width = opaquedesc.width/passdownsample;//第一次降采样是使用的参数，后面就是除2去降采样了
@@ -100,21 +128,23 @@ public class DualBlur : ScriptableRendererFeature
         }
     }
     
-    DualBlurRenderPass mypass;
+    private DualBlurRenderPass m_dualBlurRenderPass;
     
     public override void Create()//进行初始化,这里最先开始
     {
-        mypass = new DualBlurRenderPass(setting.RenderFetureName);//实例化一下并传参数,name就是tag
-        mypass.renderPassEvent  = setting.passEvent;
-        mypass.passblur = setting.blur;
-        mypass.passloop = setting.loop;
-        mypass.passMat = setting.mymat;
-        mypass.passdownsample = setting.downsample;
+        // _dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);
+        // TODO: Delete
+        m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数,name就是tag
+        m_dualBlurRenderPass.renderPassEvent  = setting.passEvent;
+        m_dualBlurRenderPass.passblur = setting.blur;
+        m_dualBlurRenderPass.passloop = setting.loop;
+        m_dualBlurRenderPass.passMat = setting.mymat;
+        m_dualBlurRenderPass.passdownsample = setting.downsample;
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)//传值到pass里
     {
-        mypass.setup(renderer.cameraColorTarget);
-        renderer.EnqueuePass(mypass);
+        m_dualBlurRenderPass.setup(renderer.cameraColorTarget);
+        renderer.EnqueuePass(m_dualBlurRenderPass);
     }
 } 
