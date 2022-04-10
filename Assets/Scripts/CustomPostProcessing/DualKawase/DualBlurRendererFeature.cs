@@ -10,8 +10,6 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
         public string RenderFetureName = "Dual Kawase";//render feature name
     }
 
-    public mysetting setting = new mysetting();
-
     class DualBlurRenderPass : ScriptableRenderPass
     {
         static readonly string ProfilerRenderTag = "Dual Blur";
@@ -125,8 +123,6 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
     public override void Create()//进行初始化,这里最先开始
     {
         m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数
-        // TODO: Delete
-        m_dualBlurRenderPass.renderPassEvent = setting.passEvent;
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)//传值到pass里

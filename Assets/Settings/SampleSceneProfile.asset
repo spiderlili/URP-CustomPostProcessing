@@ -109,10 +109,10 @@ MonoBehaviour:
   m_AdvancedMode: 0
   BlurRadius:
     m_OverrideState: 1
-    m_Value: 1.01
+    m_Value: 0.73
   Iteration:
     m_OverrideState: 1
-    m_Value: 2
+    m_Value: 4
   downSample:
     m_OverrideState: 1
-    m_Value: 1.78
+    m_Value: 1
