@@ -23,13 +23,15 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
         static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         static readonly int TempTargetId = Shader.PropertyToID("_TempTargetDualkawaseBlur");
         static readonly int OffsetId = Shader.PropertyToID("_BlurOffset");
-        private RenderTargetIdentifier passSource{get;set;}
+
         RenderTargetIdentifier buffer1;//RTa1的ID
         RenderTargetIdentifier buffer2;//RTa2的ID
         string RenderFetureName;
-        Material DualKawaseBlurMaterial;
-        private DualBlurCustomVolume dualBlurVolume;
 
+        private DualBlurCustomVolume dualBlurVolume;
+        Material DualKawaseBlurMaterial;
+        private RenderTargetIdentifier currentRenderTarget{get;set;}
+        
         struct LEVEL
         {
             public int down;
@@ -51,9 +53,9 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
             DualKawaseBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
         }
 
-        public void Setup(RenderTargetIdentifier sour)//初始化，接收render feather传的图
+        public void Setup(RenderTargetIdentifier currentTarget)//初始化，接收render feather传的图
         {
-            this.passSource = sour;
+            this.currentRenderTarget = currentTarget;
             my_level = new LEVEL[maxLevel];
             for (int t = 0; t < maxLevel; t++)//申请32个ID的，up和down各16个，用这个id去代替临时RT来使用
             {
@@ -91,7 +93,7 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
             opaquedesc.depthBufferBits = 0;
 
             // Downsampling
-            RenderTargetIdentifier LastDown = passSource;//把初始图像作为lastdown的起始图去计算
+            RenderTargetIdentifier LastDown = currentRenderTarget;//把初始图像作为lastdown的起始图去计算
 
             for(int t = 0; t < dualBlurVolume.Iteration.value; t++)
             {
@@ -114,7 +116,7 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
                 lastUp = midUp;
             }
             
-            cmd.Blit(lastUp,passSource,DualKawaseBlurMaterial,1);//补一次up，顺便就输出了
+            cmd.Blit(lastUp,currentRenderTarget,DualKawaseBlurMaterial,1);//补一次up，顺便就输出了
             context.ExecuteCommandBuffer(cmd);//执行命令缓冲区的该命令
             CommandBufferPool.Release(cmd);//释放cmd
             for(int k = 0;k<dualBlurVolume.Iteration.value;k++)//清RT，防止内存泄漏
