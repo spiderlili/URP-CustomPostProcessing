@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class DualBlur : ScriptableRendererFeature
+public class DualBlurRendererFeature : ScriptableRendererFeature
 {
     [System.Serializable]public class mysetting//定义一个设置的类
     {
