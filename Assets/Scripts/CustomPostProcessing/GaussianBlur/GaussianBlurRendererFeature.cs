@@ -42,7 +42,12 @@ public class GaussianBlurPass : ScriptableRenderPass
         }
         GaussianBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
     }
-
+    
+    public void Setup(in RenderTargetIdentifier currentTarget)
+    {
+        this.currentTarget = currentTarget;
+    }
+    
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         if (GaussianBlurMaterial == null)
@@ -63,12 +68,7 @@ public class GaussianBlurPass : ScriptableRenderPass
         context.ExecuteCommandBuffer(cmd);
         CommandBufferPool.Release(cmd);
     }
-
-    public void Setup(in RenderTargetIdentifier currentTarget)
-    {
-        this.currentTarget = currentTarget;
-    }
-
+    
     void Render(CommandBuffer cmd, ref RenderingData renderingData)
     {
         // Pass in render target

@@ -4,12 +4,19 @@ using UnityEngine.Rendering.Universal;
 
 public class DualBlurRendererFeature : ScriptableRendererFeature
 {
-    [System.Serializable]public class mysetting//定义一个设置的类
+    private DualBlurRenderPass m_dualBlurRenderPass;
+    
+    public override void Create()//进行初始化,这里最先开始
     {
-        public RenderPassEvent passEvent = RenderPassEvent.AfterRenderingTransparents;
-        public string RenderFetureName = "Dual Kawase";//render feature name
+        m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数
     }
-
+    
+    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)//传值到pass里
+    {
+        m_dualBlurRenderPass.Setup(renderer.cameraColorTarget);
+        renderer.EnqueuePass(m_dualBlurRenderPass);
+    }
+    
     class DualBlurRenderPass : ScriptableRenderPass
     {
         static readonly string ProfilerRenderTag = "Dual Blur";
@@ -44,7 +51,7 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
             DualKawaseBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
         }
 
-        public void setup(RenderTargetIdentifier sour)//初始化，接收render feather传的图
+        public void Setup(RenderTargetIdentifier sour)//初始化，接收render feather传的图
         {
             this.passSource = sour;
             my_level = new LEVEL[maxLevel];
@@ -116,18 +123,5 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
                cmd.ReleaseTemporaryRT(my_level[k].down);
             }
         }
-    }
-    
-    private DualBlurRenderPass m_dualBlurRenderPass;
-    
-    public override void Create()//进行初始化,这里最先开始
-    {
-        m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数
-    }
-
-    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)//传值到pass里
-    {
-        m_dualBlurRenderPass.setup(renderer.cameraColorTarget);
-        renderer.EnqueuePass(m_dualBlurRenderPass);
     }
 } 
