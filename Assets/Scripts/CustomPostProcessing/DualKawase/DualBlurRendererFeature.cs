@@ -125,5 +125,46 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
                cmd.ReleaseTemporaryRT(my_level[k].down);
             }
         }
+
+        void Render(CommandBuffer cmd, ref RenderingData renderingData)
+        {
+            // Pass in render target
+            ref var cameraData = ref renderingData.cameraData;
+            var source = currentRenderTarget;
+            int destination = TempTargetId;
+            
+            // Use int to create Pixelated Box Blur effect similar to the one in MineCraft
+            // int w = (int)(cameraData.camera.scaledPixelWidth / GaussianBlur.downSample.value);
+            // int h = (int)(cameraData.camera.scaledPixelHeight / GaussianBlur.downSample.value);
+            // GaussianBlurMaterial.SetFloat(FocusPowerId, GaussianBlur.BlurRadius.value);
+
+            int shaderPass = 0;
+            cmd.SetGlobalTexture(MainTexId, source);
+        
+            // cmd.GetTemporaryRT(destination, w, h, 0, FilterMode.Point, RenderTextureFormat.Default);
+
+            cmd.Blit(source, destination);
+            
+            for (int i = 0; i < dualBlurVolume.Iteration.value; i++)
+            {
+                // cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Point, RenderTextureFormat.Default);
+                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass);
+                cmd.Blit(source, destination);
+                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass + 1);
+                cmd.Blit(source, destination);
+            }
+        
+            for (int i = 0; i < dualBlurVolume.Iteration.value; i++)
+            {
+                // cmd.GetTemporaryRT(destination, w * 2, h * 2, 0, FilterMode.Point, RenderTextureFormat.Default);
+                // cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Bilinear, RenderTextureFormat.Default);
+                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass);
+                cmd.Blit(source, destination);
+                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass + 1);
+                cmd.Blit(source, destination);
+            }
+
+            cmd.Blit(destination, destination, DualKawaseBlurMaterial, 0);
+        }
     }
 } 
