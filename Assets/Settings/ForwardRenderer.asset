@@ -126,7 +126,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6095e4158310b437fbe2f77f7dde0ad1, type: 3}
   m_Name: NewDualBlur
   m_EditorClassIdentifier: 
-  m_Active: 1
-  setting:
-    passEvent: 500
-    RenderFetureName: Dual Kawase
+  m_Active: 0

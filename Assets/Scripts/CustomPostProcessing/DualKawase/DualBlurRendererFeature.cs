@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -67,7 +68,8 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
             }
         }
 
-        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)//执行
+        // The actual execution of the pass. This is where custom rendering occurs.
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             // Debug warning
             if (DualKawaseBlurMaterial == null)
@@ -83,7 +85,7 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
             if (dualBlurVolume == null) { return; }
             if (!dualBlurVolume.IsActive()) { return; }
             
-            // Set command buffer
+            // Grab a command buffer. We put the actual execution of the pass inside of a profiling scope.
             CommandBuffer cmd = CommandBufferPool.Get(ProfilerRenderTag);//定义cmd
             DualKawaseBlurMaterial.SetFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//指定材质参数
             //cmd.SetGlobalFloat("_BlurRadiusOffset",dualBlurVolume.BlurRadius.value);//设置模糊,但是我不想全局设置怕影响其他的shader，所以注销它了用上面那个，但是cmd这个性能可能好些？
@@ -117,14 +119,32 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
             }
             
             cmd.Blit(lastUp,currentRenderTarget,DualKawaseBlurMaterial,1);//补一次up，顺便就输出了
+            
+            // Execute the command buffer and release it
             context.ExecuteCommandBuffer(cmd);//执行命令缓冲区的该命令
             CommandBufferPool.Release(cmd);//释放cmd
+        }
+        
+        
+        // Called when the camera has finished rendering.
+        // Here we release/cleanup any allocated resources that were created by this pass.
+        // Gets called for all cameras i na camera stack.
+        public override void OnCameraCleanup(CommandBuffer cmd)
+        {
+            if (cmd == null) throw new ArgumentNullException("cmd");
+        
+            // Since we created a temporary render texture in OnCameraSetup, we need to release the memory here to avoid a leak.
             for(int k = 0;k<dualBlurVolume.Iteration.value;k++)//清RT，防止内存泄漏
             {
-               cmd.ReleaseTemporaryRT(my_level[k].up);
-               cmd.ReleaseTemporaryRT(my_level[k].down);
+                cmd.ReleaseTemporaryRT(my_level[k].up);
+                cmd.ReleaseTemporaryRT(my_level[k].down);
             }
         }
+
+        // public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) gets called by the renderer before executing the pass.
+        // Can be used to configure render targets and their clearing state.
+        // Can be user to create temporary render target textures.
+        // If this method is not overriden, the render pass will render to the active camera render target.
 
         void Render(CommandBuffer cmd, ref RenderingData renderingData)
         {
