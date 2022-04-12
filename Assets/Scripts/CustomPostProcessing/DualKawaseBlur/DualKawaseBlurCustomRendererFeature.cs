@@ -2,24 +2,31 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+// Add a ScriptableRendererFeature to the ScriptableRenderer. Use this scriptable renderer feature to inject render passes into the renderer.
 public class DualKawaseBlurCustomRendererFeature : ScriptableRendererFeature
 {
     DualKawaseBlurPass _dualKawaseBlurPass;
 
+    // Gets called when: serialization happens, enable / disable the render feature, a property is changed in the inspector of the render feature.
     public override void Create()
     {
         _dualKawaseBlurPass = new DualKawaseBlurPass(RenderPassEvent.BeforeRenderingPostProcessing);
     }
 
+    // Injects >= 1 render passes in the renderer. Gets called when setting up the renderer & every frame (once per-camera). Will NOT be called if the renderer feature is disabled in the renderer inspector.
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
         _dualKawaseBlurPass.Setup(renderer.cameraColorTarget);
+        
+        // Here you can queue up multiple passes after each other.
         renderer.EnqueuePass(_dualKawaseBlurPass);
     }
 }
 
+// Implement a logical rendering pass that can be used to extend URP renderer.
 public class DualKawaseBlurPass : ScriptableRenderPass
 {
+    // The profiler tag that will show up in the frame debugger.
     static readonly string ProfilerRenderTag = "Dual Kawase Blur";
     static readonly int MainTexId = Shader.PropertyToID("_MainTex");
     static readonly int TempTargetId = Shader.PropertyToID("_TempTargetDualkawaseBlur");
