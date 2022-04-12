@@ -3,24 +3,28 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+// Add a ScriptableRendererFeature to the ScriptableRenderer. Use this scriptable renderer feature to inject render passes into the renderer.
 public class DualBlurRendererFeature : ScriptableRendererFeature
 {
     private DualBlurRenderPass m_dualBlurRenderPass;
     
-    public override void Create()//进行初始化,这里最先开始
+    // Initialization. Gets called when: serialization happens, enable / disable the render feature, a property is changed in the inspector of the render feature.
+    public override void Create()
     {
-        m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);//实例化一下并传参数
+        m_dualBlurRenderPass = new DualBlurRenderPass(RenderPassEvent.BeforeRenderingPostProcessing);
     }
     
-    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)//传值到pass里
+    // Injects >= 1 render passes in the renderer. Gets called when setting up the renderer & every frame (once per-camera). Will NOT be called if the renderer feature is disabled in the renderer inspector.
+    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
         m_dualBlurRenderPass.Setup(renderer.cameraColorTarget);
         renderer.EnqueuePass(m_dualBlurRenderPass);
     }
     
+    // Implement a logical rendering pass that can be used to extend URP renderer.
     class DualBlurRenderPass : ScriptableRenderPass
     {
-        static readonly string ProfilerRenderTag = "Dual Blur";
+        static readonly string ProfilerRenderTag = "Dual Blur"; // The profiler tag that will show up in the frame debugger.
         static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         static readonly int TempTargetId = Shader.PropertyToID("_TempTargetDualkawaseBlur");
         static readonly int OffsetId = Shader.PropertyToID("_BlurOffset");
@@ -54,7 +58,7 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
             DualKawaseBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
         }
 
-        public void Setup(RenderTargetIdentifier currentTarget)//初始化，接收render feather传的图
+        public void Setup(RenderTargetIdentifier currentTarget)//初始化，接收render feature传的图
         {
             this.currentRenderTarget = currentTarget;
             my_level = new LEVEL[maxLevel];
@@ -109,7 +113,7 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
                 height = Mathf.Max(height/2,1);
             }
 
-            // Upsampling
+            // UpSampling
             int lastUp = my_level[dualBlurVolume.Iteration.value-1].down;//把down的最后一次图像当成up的第一张图去计算up
             for(int j = dualBlurVolume.Iteration.value-2; j >= 0; j--)//这里减2是因为第一次已经有了要减去1，但是第一次是直接复制的，所以循环完后还得补一次up
             {
@@ -128,7 +132,7 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
         
         // Called when the camera has finished rendering.
         // Here we release/cleanup any allocated resources that were created by this pass.
-        // Gets called for all cameras i na camera stack.
+        // Gets called for all cameras in a camera stack.
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
             if (cmd == null) throw new ArgumentNullException("cmd");
@@ -139,52 +143,6 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
                 cmd.ReleaseTemporaryRT(my_level[k].up);
                 cmd.ReleaseTemporaryRT(my_level[k].down);
             }
-        }
-
-        // public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) gets called by the renderer before executing the pass.
-        // Can be used to configure render targets and their clearing state.
-        // Can be user to create temporary render target textures.
-        // If this method is not overriden, the render pass will render to the active camera render target.
-
-        void Render(CommandBuffer cmd, ref RenderingData renderingData)
-        {
-            // Pass in render target
-            ref var cameraData = ref renderingData.cameraData;
-            var source = currentRenderTarget;
-            int destination = TempTargetId;
-            
-            // Use int to create Pixelated Box Blur effect similar to the one in MineCraft
-            // int w = (int)(cameraData.camera.scaledPixelWidth / GaussianBlur.downSample.value);
-            // int h = (int)(cameraData.camera.scaledPixelHeight / GaussianBlur.downSample.value);
-            // GaussianBlurMaterial.SetFloat(FocusPowerId, GaussianBlur.BlurRadius.value);
-
-            int shaderPass = 0;
-            cmd.SetGlobalTexture(MainTexId, source);
-        
-            // cmd.GetTemporaryRT(destination, w, h, 0, FilterMode.Point, RenderTextureFormat.Default);
-
-            cmd.Blit(source, destination);
-            
-            for (int i = 0; i < dualBlurVolume.Iteration.value; i++)
-            {
-                // cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Point, RenderTextureFormat.Default);
-                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass);
-                cmd.Blit(source, destination);
-                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass + 1);
-                cmd.Blit(source, destination);
-            }
-        
-            for (int i = 0; i < dualBlurVolume.Iteration.value; i++)
-            {
-                // cmd.GetTemporaryRT(destination, w * 2, h * 2, 0, FilterMode.Point, RenderTextureFormat.Default);
-                // cmd.GetTemporaryRT(destination, w / 2, h / 2, 0, FilterMode.Bilinear, RenderTextureFormat.Default);
-                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass);
-                cmd.Blit(source, destination);
-                cmd.Blit(destination, source, DualKawaseBlurMaterial, shaderPass + 1);
-                cmd.Blit(source, destination);
-            }
-
-            cmd.Blit(destination, destination, DualKawaseBlurMaterial, 0);
         }
     }
 } 
