@@ -129,7 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f6056d773cd04ed986b8f72cd2773de, type: 3}
   m_Name: DualBlurCustomVolume
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   m_AdvancedMode: 0
   BlurRadius:
     m_OverrideState: 1
@@ -139,4 +139,4 @@ MonoBehaviour:
     m_Value: 2
   downSample:
     m_OverrideState: 1
-    m_Value: 2.11
+    m_Value: 2.43
