@@ -29,8 +29,8 @@ public class DualBlurRendererFeature : ScriptableRendererFeature
         static readonly int TempTargetId = Shader.PropertyToID("_TempTargetDualkawaseBlur");
         static readonly int OffsetId = Shader.PropertyToID("_BlurOffset");
 
-        RenderTargetIdentifier buffer1;//RTa1的ID
-        RenderTargetIdentifier buffer2;//RTa2的ID
+        RenderTargetIdentifier buffer1;//RTa1's ID
+        RenderTargetIdentifier buffer2;//RTa2's ID
         string RenderFetureName;
 
         private DualBlurCustomVolume dualBlurVolume;
