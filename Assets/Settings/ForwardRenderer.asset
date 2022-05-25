@@ -29,7 +29,7 @@ MonoBehaviour:
   _renderTargetId: _RenderMetaballsRT
   _layerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   _blurMaterial: {fileID: 2100000, guid: 51fc92ed105574c75ab327216c1750e2, type: 2}
   _blurPasses: 1
 --- !u!114 &-2366006225647765398
@@ -121,4 +121,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6095e4158310b437fbe2f77f7dde0ad1, type: 3}
   m_Name: NewDualBlur
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1

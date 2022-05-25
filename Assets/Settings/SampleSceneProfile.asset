@@ -87,7 +87,7 @@ MonoBehaviour:
   m_AdvancedMode: 0
   BlurRadius:
     m_OverrideState: 1
-    m_Value: 3.04
+    m_Value: 1.7
   Iteration:
     m_OverrideState: 0
     m_Value: 5
@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69d3a364714ea48608d770ce9464206e, type: 3}
   m_Name: DualKawaseBlurCustomVolume
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   m_AdvancedMode: 0
   BlurRadius:
     m_OverrideState: 1
@@ -129,11 +129,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f6056d773cd04ed986b8f72cd2773de, type: 3}
   m_Name: DualBlurCustomVolume
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   m_AdvancedMode: 0
   BlurRadius:
     m_OverrideState: 1
-    m_Value: 0.87
+    m_Value: 1.89
   Iteration:
     m_OverrideState: 1
     m_Value: 2
