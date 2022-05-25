@@ -8,7 +8,7 @@ Shader "PostProcessing/Dual Kawase Blur"
 	
 	CBUFFER_START(UnityPerMaterial)
 	uniform half _Offset;
-    uniform float4 _MainTex_ST;
+    	uniform float4 _MainTex_ST;
 	uniform float4 _MainTex_TexelSize; // x = 1.0/width, y = 1.0/height, z = width, w = height
     CBUFFER_END
 	
