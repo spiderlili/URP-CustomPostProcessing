@@ -1,3 +1,4 @@
+// Kawase Blur source: http://genderi.org/frame-buffer-postprocessing-effects-in-double-s-t-e-a-l-wreckl.html
 Shader "PostProcessing/Dual Kawase Blur"
 {
 	HLSLINCLUDE
