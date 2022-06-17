@@ -2,23 +2,21 @@ Shader "PostProcessing/Kawase Blur"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        _MainTex("Main Texture", 2D) = "white" { }
     }
 
     SubShader
-    {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+    {   
+        // No culling or depth
+        Cull Off ZWrite Off ZTest Always
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
 
-            #include "UnityCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             struct appdata
             {
@@ -29,40 +27,44 @@ Shader "PostProcessing/Kawase Blur"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
-
-            sampler2D _MainTex;
-            float4 _MainTex_TexelSize;
-            float4 _MainTex_ST;
             
-            float _offset;
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_TexelSize;
+                float _Offset;
+                float _ExtraBlur;
+                float _BlurRadius;
+            CBUFFER_END
 
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.vertex = TransformObjectToHClip(v.vertex.xyz);
+                o.uv = v.uv;
                 return o;
             }
 
-            fixed4 frag (v2f input) : SV_Target
+            half4 frag (v2f input) : SV_Target
             {
                 float2 res = _MainTex_TexelSize.xy;
-                float i = _offset;
-    
-                fixed4 col;                
-                col = tex2D( _MainTex, input.uv );
-                col += tex2D( _MainTex, input.uv + float2( i, i ) * res );
-                col += tex2D( _MainTex, input.uv + float2( i, -i ) * res );
-                col += tex2D( _MainTex, input.uv + float2( -i, i ) * res );
-                col += tex2D( _MainTex, input.uv + float2( -i, -i ) * res );
+                float i = _Offset * _BlurRadius;
+                
+                half4 col = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, input.uv, _ExtraBlur);
+                col += SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, input.uv + float2( i, i ) * res, _ExtraBlur);
+                col += SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, input.uv + float2( i, -i ) * res, _ExtraBlur);
+                col += SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, input.uv + float2( -i, i ) * res, _ExtraBlur);
+                col += SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, input.uv + float2( -i, -i ) * res, _ExtraBlur);
                 col /= 5.0f;
+
+                col = saturate(col);
                 
                 return col;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }
