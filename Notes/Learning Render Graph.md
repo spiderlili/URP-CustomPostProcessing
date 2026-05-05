@@ -23,15 +23,18 @@
 #### Example: how to see where a renderer feature sits in your render pipeline: 
 - Assets > Settings > ForwardRenderer (Universal Renderer Data) with a renderer feature (.e.g. SSAO)
 - Blit SSAO pass in Render Graph Viewer: the effect is applied as a block operation, efficiently transferring & modifying pixel data from these source textures to create a new texture with the SSAO effect applied
-  - the source textures are the green access blocks
+  - source textures = green access blocks
   - this SSAO pass reads the camera depth texture & the camera normals texture: resources used to decide where the shadowing should occur; then it reads & writes to screen space occlusion textures `_ScreenSpaceOcclusionTexture`.
-  - the globe icon indicates this render pass sets this texture as a global resource
+  - globe icon indicates this render pass sets this texture as a global resource
 - there are a few other Blits:
   - Blit Bloom Mipmaps 
   - Blit Post Prcessing 
 - switch off SSAO, click the refresh button, switch to the game view -> SSAO pass is no longer part of the pipeline
 
-[cont: 0352](https://www.bilibili.com/video/BV1G8gozxE2m/?spm_id_from=333.337.search-card.all.click&vd_source=c52aacd3530e7f3dabe93deb78074f99)
+2 tools to examine the render passes in Window > Analysis:
+1. Rendering Debugger: visualises lighting, rendering, material characteristics; can customise this with your own visualisations in Rendering Debug. Depth overlay in Map Overlays is particularly useful
+2. Frame Debugger
+[cont: 0416](https://www.bilibili.com/video/BV1G8gozxE2m/?spm_id_from=333.337.search-card.all.click&vd_source=c52aacd3530e7f3dabe93deb78074f99)
 
 ### What is a blit?
 - Bit Block Transfer: a common CG operation for manipulating large blocks of pixels
