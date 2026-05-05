@@ -1,70 +1,81 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.RenderGraphModule;
+using UnityEngine.Rendering.RenderGraphModule.Util;
 using UnityEngine.Rendering.Universal;
 
 internal class BlitRenderPass : ScriptableRenderPass
 {
-    private RenderTargetIdentifier cameraColorTargetIdent;
-
     private readonly Material materialToBlit;
-
-    // used to label this pass in Unity's Frame Debug utility
     private readonly string profilerTag;
-    private RTHandle tempTexture;
-    private static readonly int Min = Shader.PropertyToID("_Min");
-    private static readonly int Max = Shader.PropertyToID("_Max");
 
-    public BlitRenderPass(string profilerTag,
-        RenderPassEvent renderPassEvent, Material materialToBlit)
+    // This class holds the data the Render Graph needs during the execution phase
+    private class PassData
+    {
+        public TextureHandle src;
+        public TextureHandle dest;
+        public Material material;
+    }
+
+    public BlitRenderPass(string profilerTag, RenderPassEvent renderPassEvent, Material materialToBlit)
     {
         this.profilerTag = profilerTag;
         this.renderPassEvent = renderPassEvent;
         this.materialToBlit = materialToBlit;
     }
 
-    // This isn't part of the ScriptableRenderPass class and is our own addition.
-    // For this custom pass we need the camera's color target, so that gets passed in.
-    public void Setup(RenderTargetIdentifier cameraColorTargetIdent)
+    public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
     {
-        this.cameraColorTargetIdent = cameraColorTargetIdent;
-    }
+        UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
+        UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
 
-    // called each frame before Execute, use it to set up things the pass will need
-    public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
-    {
-        // create a temporary render texture that matches the camera
-        cmd.GetTemporaryRT(tempTexture.id, cameraTextureDescriptor);
-    }
+        // Ensure we have a valid target and a material
+        if (resourceData.isActiveTargetBackBuffer || materialToBlit == null)
+            return;
 
-    // Execute is called for every eligible camera every frame. It's not called at the moment that
-    // rendering is actually taking place, so don't directly execute rendering commands here.
-    // Instead use the methods on ScriptableRenderContext to set up instructions.
-    // RenderingData provides a bunch of (not very well documented) information about the scene
-    // and what's being rendered.
-    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
-    {
-        // fetch a command buffer to use
-        var cmd = CommandBufferPool.Get(profilerTag);
-        cmd.Clear();
+        // In Render Graph, we use the active color texture from resourceData
+        TextureHandle cameraColorTarget = resourceData.activeColorTexture;
 
-        // the actual content of our custom render pass!
-        // we apply our material while blitting to a temporary texture
-        cmd.Blit(cameraColorTargetIdent, tempTexture.Identifier(), materialToBlit, 0);
+        // Create a description for our temporary texture based on the camera's setup
+        RenderTextureDescriptor desc = cameraData.cameraTargetDescriptor;
+        desc.depthBufferBits = 0; // We only need color for blitting
 
-        // ...then blit it back again 
-        cmd.Blit(tempTexture.Identifier(), cameraColorTargetIdent);
+        // Create a temporary texture via the Render Graph (handled automatically)
+        TextureHandle tempTexture = UniversalRenderer.CreateRenderGraphTexture(renderGraph, desc, "_TempBlitTexture", false);
 
-        // don't forget to tell ScriptableRenderContext to actually execute the commands
-        context.ExecuteCommandBuffer(cmd);
+        // --- FIRST PASS: Camera -> Temp (with material) ---
+        using (var builder = renderGraph.AddRasterRenderPass<PassData>(profilerTag + "_Horizontal", out var passData))
+        {
+            passData.src = cameraColorTarget;
+            passData.dest = tempTexture;
+            passData.material = materialToBlit;
 
-        // tidy up after ourselves
-        cmd.Clear();
-        CommandBufferPool.Release(cmd);
-    }
+            // Define dependencies: what are we reading and what are we writing?
+            builder.UseTexture(passData.src, AccessFlags.Read);
+            builder.SetRenderAttachment(passData.dest, 0, AccessFlags.Write);
 
-    // called after Execute, use it to clean up anything allocated in Configure
-    public override void FrameCleanup(CommandBuffer cmd)
-    {
-        cmd.ReleaseTemporaryRT(tempTexture.id);
+            builder.SetRenderFunc((PassData data, RasterGraphContext context) =>
+            {
+                // Use Blitter for Unity 6 compatibility
+                Blitter.BlitTexture(context.cmd, data.src, new Vector4(1, 1, 0, 0), data.material, 0);
+            });
+        }
+
+        // --- SECOND PASS: Temp -> Camera (back to screen) ---
+        using (var builder = renderGraph.AddRasterRenderPass<PassData>(profilerTag + "_Vertical", out var passData))
+        {
+            passData.src = tempTexture;
+            passData.dest = cameraColorTarget;
+            passData.material = materialToBlit;
+
+            builder.UseTexture(passData.src, AccessFlags.Read);
+            builder.SetRenderAttachment(passData.dest, 0, AccessFlags.Write);
+
+            builder.SetRenderFunc((PassData data, RasterGraphContext context) =>
+            {
+                // Simple blit back (no material logic needed usually, or use second pass)
+                Blitter.BlitTexture(context.cmd, data.src, new Vector4(1, 1, 0, 0), 0, false);
+            });
+        }
     }
 }

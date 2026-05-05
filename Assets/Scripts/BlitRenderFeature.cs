@@ -30,7 +30,7 @@ public class BlitRenderFeature : ScriptableRendererFeature
         // Gather up and pass any extra information our pass will need.
         // In this case we're getting the camera's color buffer target
         
-        // Remove old code: https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@16.0/manual/upgrade-guide-2023-2.html
+        // Remove old code: https://docs.unity3d.com/6000.4/Documentation/Manual/urp/upgrade-guide-unity-6-1.html
         // var cameraColorTargetIdent = renderer.cameraColorTarget;
         // renderPass.Setup(cameraColorTargetIdent);
 
@@ -39,11 +39,14 @@ public class BlitRenderFeature : ScriptableRendererFeature
         renderer.EnqueuePass(renderPass);
     }
     
+    // Remove old code
+    /*
     public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
     {
         // The target is used after allocation
         renderPass.Setup(renderer.cameraColorTarget);
     }
+    */
 
     [Serializable]
     public class MyFeatureSettings
