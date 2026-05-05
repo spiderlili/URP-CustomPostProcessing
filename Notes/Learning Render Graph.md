@@ -29,7 +29,7 @@
 - there are a few other Blits:
   - Blit Bloom Mipmaps 
   - Blit Post Prcessing 
-- switch off SSAO, click the refresh button, switch to the game view -> SSAO pass is no longer part of the pipeline
+- switch off SSAO, refresh & switch to game view -> SvSAO pass is no longer part of the pipeline
 
 2 tools to examine the render passes in Window > Analysis:
 1. Rendering Debugger: visualises lighting, rendering, material characteristics; can customise this with your own visualisations in Rendering Debug. Depth overlay in Map Overlays is particularly useful
@@ -45,8 +45,8 @@
 
 ### Example: post-processing dither renderer feature using a material to process each pixel in the image
 
-
 # TODO
 - Unity 6 update to ebook: Universal Render Pipeline for advanced Unity creators - example on how to create a full-screen color tint
 - online documentation example: creating a blur renderer feature
 - [Unity 6 Render Graph documentation](https://docs.unity3d.com/6000.2/Documentation/Manual/urp/render-graph.html)
+- https://catlikecoding.com/unity/custom-srp/6-2-0/
