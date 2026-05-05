@@ -10,7 +10,7 @@ internal class BlitRenderPass : ScriptableRenderPass
 
     // used to label this pass in Unity's Frame Debug utility
     private readonly string profilerTag;
-    private RenderTargetHandle tempTexture;
+    private RTHandle tempTexture;
     private static readonly int Min = Shader.PropertyToID("_Min");
     private static readonly int Max = Shader.PropertyToID("_Max");
 

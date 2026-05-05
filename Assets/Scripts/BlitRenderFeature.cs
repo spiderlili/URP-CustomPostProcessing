@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class BlitRenderFeature : ScriptableRendererFeature
@@ -7,7 +8,7 @@ public class BlitRenderFeature : ScriptableRendererFeature
     public MyFeatureSettings Settings = new MyFeatureSettings();
     private BlitRenderPass renderPass;
 
-    private RenderTargetHandle renderTextureHandle;
+    private RTHandle renderTextureHandle;
 
     public override void Create()
     {
@@ -28,12 +29,20 @@ public class BlitRenderFeature : ScriptableRendererFeature
 
         // Gather up and pass any extra information our pass will need.
         // In this case we're getting the camera's color buffer target
-        var cameraColorTargetIdent = renderer.cameraColorTarget;
-        renderPass.Setup(cameraColorTargetIdent);
+        
+        // Remove old code: https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@16.0/manual/upgrade-guide-2023-2.html
+        // var cameraColorTargetIdent = renderer.cameraColorTarget;
+        // renderPass.Setup(cameraColorTargetIdent);
 
         // Ask the renderer to add our pass.
         // Could queue up multiple passes and/or pick passes to use
         renderer.EnqueuePass(renderPass);
+    }
+    
+    public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
+    {
+        // The target is used after allocation
+        renderPass.Setup(renderer.cameraColorTarget);
     }
 
     [Serializable]
