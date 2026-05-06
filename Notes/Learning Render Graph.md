@@ -43,14 +43,15 @@
 - a renderer feature can be utilised at any stage of the pipeline to influence the final render
 
 # Example: creating a post-processing dither renderer feature using a material to process each pixel in the image
-- Create > Rendering > URP Renderer Feature: DitherEffectRendererFeature - a C# script containing a template for a renderer feature with 2 classes:
+- Create > Scripting > URP Renderer Feature: DitherEffectRendererFeature - a C# script containing a template for a renderer feature with 2 classes:
   - `ScriptableRendererFeature`: Renderer Feature manager class that specifies the settings, manages the lifecycle & configuration of the passes to set up the task. there might be multiple passes within a feature.
   - `ScriptableRenderPass`: worker class that defines the actual rendering logic & actions
 
+# Blur example
 [cont: 0649](https://www.bilibili.com/video/BV1G8gozxE2m/?spm_id_from=333.337.search-card.all.click&vd_source=c52aacd3530e7f3dabe93deb78074f99)
 
 # TODO
 - Unity 6 update to ebook: Universal Render Pipeline for advanced Unity creators - example on how to create a full-screen color tint
-- online documentation example: creating a blur renderer feature (seems to have been deleted)
+- online documentation example: creating a blur renderer feature (seems to have been deleted - obsolete)
 - [Unity 6 Render Graph documentation](https://docs.unity3d.com/6000.2/Documentation/Manual/urp/render-graph.html)
 - https://catlikecoding.com/unity/custom-srp/6-2-0/
