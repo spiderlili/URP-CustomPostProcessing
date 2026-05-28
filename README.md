@@ -20,13 +20,15 @@ When 1 rendering pass relies on the output of a previous pass, the GPU must fini
 
 #### What is a Renderer Feature in URP?
 - a plug-in extension you can add to your URP renderer data object (`Mobile_Renderer` or `PC_Renderer`) to make Unity run your custom rendering code during the camera’s render pipeline.
-- Think of it like adding an extra rendering module that URP will execute every frame; it registers custom render passes into the URP execution sequence, letting you draw custom objects, dispatch compute shaders, add full-screen effects, or modify how the camera renders.
-- The Renderer Feature acts as a container & configuration point that registers >= 1 Scriptable Render Passes which contain the rendering / compute logic executed by the pipeline
+- Think of it like adding an extra rendering module that URP will execute every frame; Add it to a Universal Renderer asset so it becomes part of the project’s rendering configuration. From there, you can control where in the render pipeline your custom code runs by selecting the appropriate execution stage.
+- The Renderer Feature is responsible for enqueuing (adding) >= 1 Render Passes into the renderer’s execution loop: it registers custom render passes into the URP execution sequence, letting you draw custom objects, dispatch compute shaders, add full-screen effects, or modify how the camera renders.
+- The Renderer Feature acts as a container & configuration point that registers >= 1 Scriptable Render Passes which contain the rendering / compute logic executed by the pipeline. This high-level wrapper allows you to add custom logic to the rendering pipeline: it acts as the bridge between your custom code, the Render Pass, and the renderer. 
 
 #### What is a ScriptableRenderPass?
 - It is the main way to add custom graphics behavior to URP in a clean, modular way. 
 - Each ScriptableRenderPass defines a RenderPassEvent: determining when it runs relative to camera rendering stages, such as before rendering opaques, after rendering transparent objects, or after post-processing.
 - When used with the Render Graph system: it can improve performance by managing resource lifetime, tracking pass dependencies, optimising memory allocations.
+- A Render Pass is the set of instructions that tells the GPU what to draw during a specific part of the frame, or when to dispatch a compute shader. It acts as the worker that executes the rendering logic & handles technical details like selecting render targets, defining which shaders to execute, managing resource usage, determining whether buffers should be cleared before drawing.
 
 # Resources
 - https://github.com/keijiro/URP-CameraEffectTemplate
