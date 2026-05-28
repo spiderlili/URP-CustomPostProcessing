@@ -15,5 +15,20 @@ When 1 rendering pass relies on the output of a previous pass, the GPU must fini
 - Universal Render Pipeline (URP): URP makes this much more explicit & flexible. Instead of attaching loose command buffers to a camera, you create a `ScriptableRendererFeature` containing a `ScriptableRenderPass`. You use the ConfigureTarget() and ConfigureInput() methods to tell the pipeline exactly which textures you are reading and writing.
   - Note: In the newest versions of URP (Unity 6 / URP 17+), Unity uses the Render Graph API. You declare your resource dependencies up front -> the Render Graph automatically calculates the exact barriers and sync points required so Pass B doesn't execute until Pass A is 100% finished.
 
+### How to set up the Render Pipeline for compute-shader post-processing effects
+> In URP: custom GPU operations such as compute shader dispatches are not automatically executed as part of the rendering flow -> need a way to inject custom logic into the pipeline using a Renderer Feature. Once it's added to the active URP Renderer Data asset (Mobile_RPAsset or PC_RPAsset) the pipeline will automatically call it during rendering.
+
+#### What is a Renderer Feature in URP?
+- a plug-in extension you can add to your URP renderer data object (`Mobile_Renderer` or `PC_Renderer`) to make Unity run your custom rendering code during the camera’s render pipeline.
+- Think of it like adding an extra rendering module that URP will execute every frame; it registers custom render passes into the URP execution sequence, letting you draw custom objects, dispatch compute shaders, add full-screen effects, or modify how the camera renders.
+- The Renderer Feature acts as a container & configuration point that registers >= 1 Scriptable Render Passes which contain the rendering / compute logic executed by the pipeline
+
+#### What is a ScriptableRenderPass?
+- It is the main way to add custom graphics behavior to URP in a clean, modular way. 
+- Each ScriptableRenderPass defines a RenderPassEvent: determining when it runs relative to camera rendering stages, such as before rendering opaques, after rendering transparent objects, or after post-processing.
+- When used with the Render Graph system: it can improve performance by managing resource lifetime, tracking pass dependencies, optimising memory allocations.
+
 # Resources
 - https://github.com/keijiro/URP-CameraEffectTemplate
+- https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/renderer-features/intro-to-scriptable-render-passes.html
+- https://docs.unity3d.com/6000.5/Documentation/Manual/urp/render-graph-write-render-pass.html
