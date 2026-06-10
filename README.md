@@ -18,6 +18,11 @@ When 1 rendering pass relies on the output of a previous pass, the GPU must fini
 ### How to set up the Render Pipeline for compute-shader post-processing effects
 > In URP: custom GPU operations such as compute shader dispatches are NOT automatically executed as part of the rendering flow -> need a way to inject custom logic into the pipeline using a Renderer Feature. Once it's added to the active URP Renderer Data asset (Mobile_RPAsset or PC_RPAsset) the pipeline will automatically call it during rendering.
 
+1. Create the Renderer Feature: Create < Scripting > URP Renderer Feature Script > `CustomRendererFeature.cs` 
+2. Select either the `Mobile_Renderer` or the `PC_Renderer`, depending on which renderer your project is using in Project settings > Graphics
+4. press the `Add Renderer Feature` button, select the Custom Renderer Feature option from the list.
+5. To corroborate that everything is working as expected: open the Render Graph Viewer (Window > Analysis > Render Graph Viewer) - Notice the pass named Render Custom Pass. This is the pass injected into the render pipeline by the custom Renderer Feature. Try disabling this Renderer Feature in the Inspector. You will see in the Render Graph Viewer that this pass disappears, confirming that the feature is correctly registering and executing within the pipeline.
+
 #### What is a Renderer Feature in URP?
 - a plug-in extension you can add to your URP renderer data object (`Mobile_Renderer` or `PC_Renderer` usually located in the `Settings/` folder) to make Unity run your custom rendering code during the camera’s render pipeline.
 - Think of it like adding an extra rendering module that URP will execute every frame; Add it to a Universal Renderer asset so it becomes part of the project’s rendering configuration. From there, you can control where in the render pipeline your custom code runs by selecting the appropriate execution stage.
@@ -29,6 +34,10 @@ When 1 rendering pass relies on the output of a previous pass, the GPU must fini
 - Each `ScriptableRenderPass` defines a RenderPassEvent: determining when it runs relative to camera rendering stages, such as before rendering opaques, after rendering transparent objects, or after post-processing.
 - When used with the Render Graph system: it can improve performance by managing resource lifetime, tracking pass dependencies, optimising memory allocations.
 - A Render Pass is the set of instructions that tells the GPU what to draw during a specific part of the frame, or when to dispatch a compute shader. It acts as the worker that executes the rendering logic & handles technical details like selecting render targets, defining which shaders to execute, managing resource usage, determining whether buffers should be cleared before drawing.
+
+Example:
+- `RingHighlightVFX`: use a compute shader to darken the screen while leaving a circle that is not darkened around a target object in the scene.
+- To integrate postprocessing effect into the rendering pipeline: create a URP Renderer Feature that executes a custom render pass responsible for dispatching the compute shader at the appropriate stage of rendering.
 
 # Resources
 - https://github.com/keijiro/URP-CameraEffectTemplate
