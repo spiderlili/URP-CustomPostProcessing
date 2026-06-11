@@ -50,6 +50,11 @@
 # Blur example
 [cont: 0649](https://www.bilibili.com/video/BV1G8gozxE2m/?spm_id_from=333.337.search-card.all.click&vd_source=c52aacd3530e7f3dabe93deb78074f99)
 
+# What does `RecordRenderGraph()` inside `ScriptableRenderPass` do?
+- `RecordRenderGraph()` is responsible for describing the work that will be executed later by the GPU.
+- Instead of performing rendering immediately: this method declares the resources, data, operations required by the pass.
+- The Render Graph uses this information to schedule execution, manage resource lifetimes automatically, optimise memory usage.
+
 # TODO
 - Unity 6 update to ebook: Universal Render Pipeline for advanced Unity creators - example on how to create a full-screen color tint
 - online documentation example: creating a blur renderer feature (seems to have been deleted - obsolete)
