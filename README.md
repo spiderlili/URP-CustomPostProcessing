@@ -34,6 +34,7 @@ When 1 rendering pass relies on the output of a previous pass, the GPU must fini
 - Each `ScriptableRenderPass` defines a RenderPassEvent: determining when it runs relative to camera rendering stages, such as before rendering opaques, after rendering transparent objects, or after post-processing.
 - When used with the Render Graph system: it can improve performance by managing resource lifetime, tracking pass dependencies, optimising memory allocations.
 - A Render Pass is the set of instructions that tells the GPU what to draw during a specific part of the frame, or when to dispatch a compute shader. It acts as the worker that executes the rendering logic & handles technical details like selecting render targets, defining which shaders to execute, managing resource usage, determining whether buffers should be cleared before drawing.
+- The RenderPass is usually defined in the same file as the Renderer Feature. This is the usual approach, since the pass is tightly coupled to the feature and its setting.
 
 Example:
 - `RingHighlightVFX`: use a compute shader to darken the screen while leaving a circle that is not darkened around a target object in the scene.
