@@ -131,7 +131,7 @@ Shader "Hidden/DualBlur"
 ```
 
 ## 基于RawImage的方案
-创建一个DualBlurController.cs，然后把下面的代码粘进去：
+创建一个DualBlurController.cs，然后把下面的代码粘进去 (TODO: replace Graphics.Blit with Blitter API)：
 ```
 using UnityEngine;
 using UnityEngine.UI;
@@ -289,7 +289,7 @@ public class DualBlurController : MonoBehaviour
 ```
 
 ### Unity Engine implementation:
-1. 创建Canvas，在里面加入一个Panel(覆盖全屏)，把Image组件换成Raw Image，注意颜色不透明度得给满，不然会穿帮。
+1. 创建Canvas，在里面加入1个Panel覆盖全屏，把Image组件换成Raw Image，注意颜色不透明度得给满，不然会穿帮。
 2. 把DualBlurController脚本丢进Raw Image object，把玩家视角的摄像机拖到参数里
 3. 虽然现在看是白茫茫一片，但是启动游戏效果就出来了
 4. 你可能会发现有滑块可以调节，但是调节了却没效果，这是因为没有勾选Is Update选项，默认只会在第一帧模糊画面，勾选之后就能自由调节，但是也会在每一帧都重新渲染画面。
@@ -305,3 +305,4 @@ public class DualBlurController : MonoBehaviour
 # TODO
 - https://zhuanlan.zhihu.com/p/1956060293634459269
 - https://zhuanlan.zhihu.com/p/499488452
+- [Blit in URP](https://docs.unity3d.com/6000.6/Documentation/Manual/urp/customize/blit-overview.html)
