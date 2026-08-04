@@ -308,3 +308,4 @@ public class DualBlurController : MonoBehaviour
 - [Blit in URP](https://docs.unity3d.com/6000.6/Documentation/Manual/urp/customize/blit-overview.html)
 - https://github.com/lukakldiashvili/Unified-Universal-Blur
 - https://www.youtube.com/watch?v=eAR8XYIMUxQ
+- https://www.youtube.com/watch?v=CFcGRE1DJRQ
