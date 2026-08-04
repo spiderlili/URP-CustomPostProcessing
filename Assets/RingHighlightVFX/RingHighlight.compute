@@ -1,22 +1,74 @@
 // Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel HorzPass
 #pragma kernel Highlight
 
-Texture2D<float4> source;
-RWTexture2D<float4> destination;
+// global variables
+shared Texture2D<float4> source;  // input image
+shared RWTexture2D<float4> horzBlur;
+RWTexture2D<float4> destination; // output texture where the processed result will be written
 float radius;
 float edgeWidth;
 float shade;
 float4 center;
+int blurRadius;
 
+// calculates the circular mask: distance between the current pixel position pt and the circle centre
 float inCircle(float2 pt, float2 center, float radius, float edgeWidth)
 {
-    float len = length(pt - center);
+    float len = length(pt - center); // radial distance value
+
+    // create a gradual transition between 2 thresholds (radius - edgeWidth and radius)
+    // produce a soft falloff instead of a hard edge, return values close to 1 inside the circle
+    // gradually transition to 0 towards the border
     return 1.0 - smoothstep(radius - edgeWidth, radius, len);
 }
 
+[numthreads(8, 8, 1)]
+void HorzPass(uint3 id : SV_DispatchThreadID)
+{
+    int left = max(0, (int)id.x - blurRadius);
+    int count = min(blurRadius, (int)id.x) + min(blurRadius, source.Length.x - (int)id.x);
+    float4 color = 0;
+
+    uint2 index = uint2((uint)left, id.y);
+
+    [unroll(100)]
+    for(int x=0; x<count; x++)
+    {
+        color += source[index];
+        index.x++;
+    }
+
+    color /= (float)count;
+    horzBlur[id.xy] = color;
+}
+
+// defines the size of each thread group that will execute the compute shader.
+// Each thread corresponds to one pixel coordinate, accessible through SV_DispatchThreadID.
+// Inside the Highlight kernel: read the color from the input texture source at the current pixel position
+// and write it directly to the output texture destination.
+// At this stage, no modification is applied yet; this acts as a baseline pass that confirms the compute shader correctly reads and writes texture data before introducing the circle masking logic.
 [numthreads(8,8,1)]
 void Highlight (uint3 id : SV_DispatchThreadID)
 {
-    float4 color = source[id.xy];
+    int top = max(0, (int)id.y-blurRadius);
+    int count = min(blurRadius, (int)id.y) + min(blurRadius, source.Length.y - (int)id.y);
+    float4 blurColor = 0;
+
+    uint2 index = uint2(id.x, (uint)top);
+
+    [unroll(100)]
+    for(int y=0; y<count; y++){
+        blurColor += horzBlur[index];
+        index.y++;
+    }
+
+    blurColor /= (float)count;
+
+    float4 srcColor = source[id.xy];
+    float4 shadedBlurColor = blurColor * shade;
+    float highlight = inCircle( (float2)id.xy, center.xy, radius, edgeWidth);
+    float4 color = lerp( shadedBlurColor, srcColor, highlight );
+
     destination[id.xy] = color;
 }

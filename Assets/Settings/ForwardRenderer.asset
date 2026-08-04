@@ -131,6 +131,13 @@ MonoBehaviour:
   m_Name: RingHighlightRendererFeature
   m_EditorClassIdentifier: Assembly-CSharp::RingHighlightRendererFeature
   m_Active: 1
+  settings:
+    computeShader: {fileID: 7200000, guid: 85d82a3e9b8fd4a7eaf728472227e9a3, type: 3}
+    blurRadius: 7.5
+    radius: 198
+    softenEdge: 6.7
+    shade: 0.256
+    trackedObjectName: 
 --- !u!114 &2630041669130222456
 MonoBehaviour:
   m_ObjectHideFlags: 0
