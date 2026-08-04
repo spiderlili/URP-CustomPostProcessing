@@ -44,3 +44,6 @@ Example:
 - https://github.com/keijiro/URP-CameraEffectTemplate
 - https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/renderer-features/intro-to-scriptable-render-passes.html
 - https://docs.unity3d.com/6000.5/Documentation/Manual/urp/render-graph-write-render-pass.html
+
+# Q & A
+- [How to toggle Render Features on/off at runtime](https://www.reddit.com/r/Unity3D/comments/kwylro/struggling_to_figure_how_to_toggle_render/)
