@@ -53,13 +53,6 @@ public class UIGaussianBlurLayer : MonoBehaviour
         shader = Shader.Find(shaderName);
         color = rawImage.color;
         color.a = 1f;
-        
-        // Turn off blur layer if the phone is too low powered
-        if (!SystemInfo.supportsImageEffects)
-        {
-            enabled = false;
-            return;
-        }
     }
 
     private void Cleanup()

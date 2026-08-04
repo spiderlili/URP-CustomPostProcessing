@@ -1,4 +1,4 @@
-Shader "PostProcessing/RapidGaussianBlur"
+Shader "PostProcessing/RapidGaussianBlur (BIRP)"
 {
 	Properties
 	{
