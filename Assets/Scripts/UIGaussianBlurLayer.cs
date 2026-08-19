@@ -82,7 +82,7 @@ public class UIGaussianBlurLayer : MonoBehaviour
     }
 
     // Event function that Unity calls after a Camera has finished rendering, that allows you to modify the Camera's final image.
-    async void OnRenderImage(RenderTexture src, RenderTexture dst)
+    void OnRenderImage(RenderTexture src, RenderTexture dst)
     {
         Graphics.Blit(src, dst);
         if (!gameObject.activeInHierarchy && enabled)
@@ -132,14 +132,21 @@ public class UIGaussianBlurLayer : MonoBehaviour
         }
         rawImage.texture = rt;
         rawImage.color = color;
-        
+
     # if !UNITY_EDITOR
+        DisableComponentsAfterDelay();
+    # endif
+    }
+
+    #if !UNITY_EDITOR
+    private async void DisableComponentsAfterDelay()
+    {
         await Task.Delay(delayInMsBeforDisableComponents);
         // Disable all components that's not needed after raw texture is created for better performance on device
         camera.enabled = false;
         enabled = false;
-    # endif
     }
+    #endif
 
     // Enable testing of parameters in editor only
     private void OnValidate()
