@@ -1,5 +1,28 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8120486502463989305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 980a78cc4df543b29a2663be288cd2f5, type: 3}
+  m_Name: UniversalBlurFeature
+  m_EditorClassIdentifier: Unified.Universal.Blur::Unified.UniversalBlur.Runtime.UniversalBlurFeature
+  m_Active: 1
+  iterations: 4
+  downsample: 2
+  enableMipMaps: 1
+  scale: 1
+  offset: 1
+  scaleBlurWith: 1
+  scaleReferenceSize: 1080
+  blurType: 0
+  injectionPoint: 600
+  shader: {fileID: 4800000, guid: bb11bdc2e8aaf4c80b5315f3778d7ad4, type: 3}
 --- !u!114 &-7372128702664358220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -89,7 +112,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 2630041669130222456}
   - {fileID: 2350233994427140420}
-  m_RendererFeatureMap: 787bfba8f6c87f244489e0a85db59d20
+  - {fileID: -8120486502463989305}
+  m_RendererFeatureMap: 787bfba8f6c87f244489e0a85db59d20c79947d98c3c4e8f
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -130,7 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c246fb7da7ee246ff8a940043f3fd454, type: 3}
   m_Name: RingHighlightRendererFeature
   m_EditorClassIdentifier: Assembly-CSharp::RingHighlightRendererFeature
-  m_Active: 1
+  m_Active: 0
   settings:
     computeShader: {fileID: 7200000, guid: 85d82a3e9b8fd4a7eaf728472227e9a3, type: 3}
     blurRadius: 7.5
