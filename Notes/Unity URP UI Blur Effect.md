@@ -302,6 +302,32 @@ public class DualBlurController : MonoBehaviour
 
 ## Post-processing
 
+# Unified Universal Blur
+[TODO: Workaround video for UI](https://www.youtube.com/watch?v=CFcGRE1DJRQ)
+
+### how Unity's Universal Render Pipeline (URP) and UI system handle drawing order: why a single Canvas fails for UI blur
+- Overlay Canvases draw completely outside the URP pipeline at the very end of the frame. The blur render feature cannot see any of those background UI elements to blur them because they haven't been drawn yet when the screen is captured.
+- Camera Canvases render during URP's Transparent pass. However, URP can only inject a render feature (like a blur screen grab) before or after the entire transparent queue finishes. It cannot interrupt a single Canvas mid-draw to take a snapshot of the background elements before drawing the foreground elements.
+
+### The Camera Stacking Workaround
+Split your UI across 2 cameras using URP's Camera Stacking feature -> forces Unity to finish rendering the scene and the background UI, capture the blur texture, and then render the foreground UI on top of it.
+
+1. Configure the Base Camera: Use your Main Camera (set its Render Type to Base) to render your 3D scene. Create a Canvas set to Screen Space - Camera, attach the Main Camera to it, and place all of your background UI elements (the ones you want to be blurred) inside this Canvas.
+2. Set the Blur Injection Point:Assign the Unified Blur Render Feature to the Renderer Data used by your Main Camera. Ensure the injection point is set to run after transparents (e.g., AfterRenderingTransparents or AfterRenderingPostProcessing) so the capture includes your background Canvas.
+3. Add an Overlay Camera: Create a second Camera and set its Render Type to Overlay. Select your Main Camera, scroll down to the Stack section in the inspector, and add your new Overlay Camera to the list.
+4. Build the Foreground Canvas: Create a second Canvas set to Screen Space - Camera and assign the Overlay Camera to it. Place your Blur UI Image (using the UniversalBlurUI material) at the back of this Canvas hierarchy. Place your sharp foreground UI elements in front of the Blur Image in the hierarchy.Because the Main Camera completely finishes its render loop before the Overlay Camera starts, the global blur texture is fully updated with the background UI. When the Overlay Camera draws your foreground Canvas, the Blur UI image successfully samples that background, and the rest of your foreground UI draws perfectly sharp on top.
+
+### what if I have a scene with 2D sprites and UI images rather than a 3D scene?
+The logic remains almost exactly the same. Unity’s Universal Render Pipeline (URP) treats 2D sprites (using SpriteRenderer) as transparent geometry. Because of this, the Camera Stacking workaround handles a 2D scene just as effectively as a 3D scene.
+The main difference is ensuring both cameras are set up for 2D (Orthographic) and that your camera sizes match perfectly so the layers align.
+
+1. Configure the Base 2D Camera: Select your Main Camera, set its Projection to Orthographic, and set its Render Type to Base. This camera will render your 2D scene (SpriteRenderer objects). Create a Canvas set to Screen Space - Camera, attach this Main Camera, and place your background UI elements here.
+2. Add the Blur to your 2D Renderer: Locate the 2D Renderer Data asset your URP profile is using (often named Renderer2DData). Add the Unified Blur Render Feature to it. Set the injection point to AfterRenderingTransparents. This ensures the camera captures the screen after all your 2D sprites and background UI have been drawn.
+3. Create the Overlay Camera: Create a second camera, set its Projection to Orthographic, and set its Render Type to Overlay. Crucial: Ensure the Size property of this Overlay camera exactly matches the Size of your Base camera, otherwise your UI and blur will misalign. Add this Overlay camera to the Main Camera's Stack.
+4. Build the Foreground Canvas: Create your second Canvas set to Screen Space - Camera and assign the Overlay Camera to it. Place your Blur UI Image at the top of this Canvas hierarchy (so it draws first/in the back), and place your crisp foreground UI elements below it.
+
+Note on sorting layers: In a standard 2D Unity game, you usually rely on Sorting Layers to dictate what draws in front of what. When you use Camera Stacking, Camera order completely overrides Sorting Layers. Even if a Sprite has a Sorting Layer of "Foreground" and an order of 9999, if it is rendered by the Base Camera, it will always appear behind everything rendered by the Overlay Camera. Make sure any 2D elements that need to appear in front of the blur panel are either moved to the Foreground UI Canvas, or rendered by a third camera added to the end of the stack.
+
 # TODO
 - https://zhuanlan.zhihu.com/p/1956060293634459269
 - https://zhuanlan.zhihu.com/p/499488452
