@@ -6,22 +6,22 @@ public class DualBlurController : MonoBehaviour
 {
     [Header("Blur Settings")]
     [Range(1, 5)] 
-    [SerializeField] private int blurIterations = 5;      // 采样次数
+    [SerializeField] private int blurIterations = 5;      // Sample iterations
     
     [Range(0.1f, 5f)] 
-    [SerializeField] private float blurRange = 1.0f;      // 模糊范围
+    [SerializeField] private float blurRange = 1.0f;      
 
     [Header("Target Setup")]
-    [SerializeField] private Camera sourceCamera;         // 渲染源相机
+    [SerializeField] private Camera sourceCamera;         // Render source camera
     [SerializeField] private RenderTextureFormat rtFormat = RenderTextureFormat.DefaultHDR;
 
     [SerializeField] private bool isUpdate;
     
     private RawImage _rawImage;
     private Material _blurMaterial;
-    private RenderTexture[] _downRT;  // 降采样RT数组
-    private RenderTexture[] _upRT;     // 升采样RT数组
-    private bool _isUpdating;          // 标记是否正在更新
+    private RenderTexture[] _downRT;  // downsample RT array
+    private RenderTexture[] _upRT;     // upsample RT array
+    private bool _isUpdating;          // Test blur result at runtime
 
     private void Awake()
     {
@@ -85,7 +85,7 @@ public class DualBlurController : MonoBehaviour
 
         _isUpdating = true;
         
-        // 1. 渲染源画面到初始RT
+        // Render source image to initial RT
         // FIXED: Changed depth buffer from 0 to 24 to satisfy Render Graph API camera target requirements
         // URP Render Graph API require a Camera's target Render Texture to have a depth buffer to properly render the scene geometry.
         var sourceRT = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, rtFormat);
@@ -93,30 +93,30 @@ public class DualBlurController : MonoBehaviour
         sourceCamera.Render();
         sourceCamera.targetTexture = null;
 
-        // 2. 设置Shader参数
+        // Set Shader parameters
         _blurMaterial.SetFloat("_BlurRange", blurRange);
 
-        // 3. 执行Dual Blur流程
+        // Execute Dual Blur pipeline
         RenderTexture currentRT = sourceRT;
 
-        // DownSample阶段
+        // DownSample
         for (int i = 0; i < blurIterations; i++)
         {
             Graphics.Blit(currentRT, _downRT[i], _blurMaterial, 0);
             currentRT = _downRT[i];
         }
 
-        // UpSample阶段
+        // UpSample
         for (int i = blurIterations - 1; i >= 0; i--)
         {
             Graphics.Blit(currentRT, _upRT[i], _blurMaterial, 1);
             currentRT = _upRT[i];
         }
 
-        // 4. 最终结果输出到RawImage
+        // Output final result to RawImage
         _rawImage.texture = currentRT;
 
-        // 5. 释放临时RT
+        // Release temporary RT
         RenderTexture.ReleaseTemporary(sourceRT);
 
         _isUpdating = false;
@@ -142,7 +142,7 @@ public class DualBlurController : MonoBehaviour
     public void SetBlurRange(float value)
     {
         blurRange = value;
-        // 不触发完整更新，只更新Shader参数
+        // 不触发完整更新，only update Shader parameter
         _blurMaterial.SetFloat("_BlurRange", blurRange);
     }
 
