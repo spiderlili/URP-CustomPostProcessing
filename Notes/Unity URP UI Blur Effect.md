@@ -303,7 +303,9 @@ public class DualBlurController : MonoBehaviour
 ## Post-processing
 
 # Unified Universal Blur
-[TODO: Workaround video for UI](https://www.youtube.com/watch?v=CFcGRE1DJRQ)
+[TODO: TestWorkaround video for UI](https://www.youtube.com/watch?v=CFcGRE1DJRQ)
+
+The answer below are from AI & cannot be trusted. The limitation of Unified Universal Blur is that it can only blur things before transparents
 
 ### how Unity's Universal Render Pipeline (URP) and UI system handle drawing order: why a single Canvas fails for UI blur
 - Overlay Canvases draw completely outside the URP pipeline at the very end of the frame. The blur render feature cannot see any of those background UI elements to blur them because they haven't been drawn yet when the screen is captured.
