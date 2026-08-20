@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +13,7 @@ public class DualBlurController : MonoBehaviour
     [SerializeField] private float blurRange = 1.0f;      
 
     [Header("Target Setup")]
-    [SerializeField] private Camera sourceCamera;         // Render source camera
+    [SerializeField] private Camera sourceCamera;         // Render source camera (unused for capture, kept for compatibility)
     [SerializeField] private RenderTextureFormat rtFormat = RenderTextureFormat.DefaultHDR;
 
     [SerializeField] private bool isUpdate;
@@ -22,6 +23,7 @@ public class DualBlurController : MonoBehaviour
     private RenderTexture[] _downRT;  // downsample RT array
     private RenderTexture[] _upRT;     // upsample RT array
     private bool _isUpdating;          // Test blur result at runtime
+    private Coroutine _captureRoutine;
 
     private void Awake()
     {
@@ -34,11 +36,17 @@ public class DualBlurController : MonoBehaviour
     private void OnEnable()
     {
         InitializeRT();
-        UpdateBlur();
+        RequestUpdateBlur();
     }
 
     private void OnDisable()
     {
+        if (_captureRoutine != null)
+        {
+            StopCoroutine(_captureRoutine);
+            _captureRoutine = null;
+        }
+        _isUpdating = false;
         ReleaseRT();
     }
 
@@ -79,19 +87,30 @@ public class DualBlurController : MonoBehaviour
         }
     }
 
-    private void UpdateBlur()
+    private void RequestUpdateBlur()
     {
-        if (_isUpdating) return;
+        if (_isUpdating || !gameObject.activeInHierarchy) return;
+        _captureRoutine = StartCoroutine(CaptureAndBlur());
+    }
 
+    private IEnumerator CaptureAndBlur()
+    {
         _isUpdating = true;
-        
-        // Render source image to initial RT
+
+        // Hide the RawImage itself so it isn't captured in its own source frame (avoids feedback loop).
+        bool wasEnabled = _rawImage.enabled;
+        _rawImage.enabled = false;
+
+        // Wait until the full frame (all cameras + all UI, including transparent overlay/camera-space canvases)
+        // has been composited to the backbuffer before we grab it.
+        yield return new WaitForEndOfFrame();
+
         // FIXED: Changed depth buffer from 0 to 24 to satisfy Render Graph API camera target requirements
         // URP Render Graph API require a Camera's target Render Texture to have a depth buffer to properly render the scene geometry.
         var sourceRT = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, rtFormat);
-        sourceCamera.targetTexture = sourceRT;
-        sourceCamera.Render();
-        sourceCamera.targetTexture = null;
+        ScreenCapture.CaptureScreenshotIntoRenderTexture(sourceRT);
+
+        _rawImage.enabled = wasEnabled;
 
         // Set Shader parameters
         _blurMaterial.SetFloat("_BlurRange", blurRange);
@@ -100,7 +119,17 @@ public class DualBlurController : MonoBehaviour
         RenderTexture currentRT = sourceRT;
 
         // DownSample
-        for (int i = 0; i < blurIterations; i++)
+        // NOTE: ScreenCapture.CaptureScreenshotIntoRenderTexture writes rows in top-to-bottom screen order,
+        // which is the opposite of Unity's usual bottom-to-top RenderTexture UV convention. Flip vertically
+        // on the very first blit so every subsequent pass (and the final RawImage) sees correct orientation.
+        _blurMaterial.SetTextureScale("_MainTex", new Vector2(1f, -1f));
+        _blurMaterial.SetTextureOffset("_MainTex", new Vector2(0f, 1f));
+        Graphics.Blit(currentRT, _downRT[0], _blurMaterial, 0);
+        _blurMaterial.SetTextureScale("_MainTex", Vector2.one);
+        _blurMaterial.SetTextureOffset("_MainTex", Vector2.zero);
+        currentRT = _downRT[0];
+
+        for (int i = 1; i < blurIterations; i++)
         {
             Graphics.Blit(currentRT, _downRT[i], _blurMaterial, 0);
             currentRT = _downRT[i];
@@ -120,11 +149,12 @@ public class DualBlurController : MonoBehaviour
         RenderTexture.ReleaseTemporary(sourceRT);
 
         _isUpdating = false;
+        _captureRoutine = null;
     }
 
     private void LateUpdate()
     {
-        if(isUpdate && !_isUpdating) UpdateBlur();
+        if(isUpdate && !_isUpdating) RequestUpdateBlur();
     }
 
     public void SetBlurIterations(float value)
@@ -150,6 +180,6 @@ public class DualBlurController : MonoBehaviour
     {
         ReleaseRT();
         InitializeRT();
-        UpdateBlur();
+        RequestUpdateBlur();
     }
 }

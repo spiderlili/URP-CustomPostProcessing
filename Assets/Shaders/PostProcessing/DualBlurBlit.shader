@@ -31,6 +31,7 @@ Shader "PostProcessing/DualBlur"
             };
 
             sampler2D _MainTex;
+            float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
             float _BlurRange;
 
@@ -38,11 +39,12 @@ Shader "PostProcessing/DualBlur"
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv[0] = v.uv;
-                o.uv[1] = v.uv + float2(-1, -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[2] = v.uv + float2(-1,  1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[3] = v.uv + float2(1,  -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[4] = v.uv + float2(1,   1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                float2 uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.uv[0] = uv;
+                o.uv[1] = uv + float2(-1, -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[2] = uv + float2(-1,  1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[3] = uv + float2(1,  -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[4] = uv + float2(1,   1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
                 return o;
             }
 
@@ -79,6 +81,7 @@ Shader "PostProcessing/DualBlur"
             };
 
             sampler2D _MainTex;
+            float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
             float _BlurRange;
 
@@ -86,14 +89,15 @@ Shader "PostProcessing/DualBlur"
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv[0] = v.uv + float2(-1, -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[1] = v.uv + float2(-1,  1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[2] = v.uv + float2(1,  -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[3] = v.uv + float2(1,   1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[4] = v.uv + float2(-2,  0) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[5] = v.uv + float2(0,  -2) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[6] = v.uv + float2(2,   0) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
-                o.uv[7] = v.uv + float2(0,   2) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                float2 uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.uv[0] = uv + float2(-1, -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[1] = uv + float2(-1,  1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[2] = uv + float2(1,  -1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[3] = uv + float2(1,   1) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[4] = uv + float2(-2,  0) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[5] = uv + float2(0,  -2) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[6] = uv + float2(2,   0) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
+                o.uv[7] = uv + float2(0,   2) * (1 + _BlurRange) * _MainTex_TexelSize.xy * 0.5;
                 return o;
             }
 
