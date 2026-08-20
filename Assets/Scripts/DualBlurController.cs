@@ -13,6 +13,7 @@ public class DualBlurController : MonoBehaviour
     [SerializeField] private float blurRange = 1.0f;      
 
     [Header("Target Setup")]
+    // TODO: remove unused camera
     [SerializeField] private Camera sourceCamera;         // Render source camera (unused for capture, kept for compatibility)
     [SerializeField] private RenderTextureFormat rtFormat = RenderTextureFormat.DefaultHDR;
 
