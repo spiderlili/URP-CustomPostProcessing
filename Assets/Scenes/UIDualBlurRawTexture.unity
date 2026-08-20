@@ -447,6 +447,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8935806303524023483, guid: 9aa4bb98acb4742229dc3330c771e135, type: 3}
+      propertyPath: blurIterations
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
