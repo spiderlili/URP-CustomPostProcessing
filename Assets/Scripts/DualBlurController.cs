@@ -115,21 +115,17 @@ public class DualBlurController : MonoBehaviour
         // Set Shader parameters
         _blurMaterial.SetFloat("_BlurRange", blurRange);
 
+        // Flip the raw screen capture vertically into a plain RT before running it through the blur
+        // shader. This is done with a plain (material-less) Blit so it can't interact with the blur
+        // shader's own UV math - it just corrects orientation once, up front.
+        var flippedRT = RenderTexture.GetTemporary(Screen.width, Screen.height, 0, rtFormat);
+        Graphics.Blit(sourceRT, flippedRT, new Vector2(1f, -1f), new Vector2(0f, 1f));
+
         // Execute Dual Blur pipeline
-        RenderTexture currentRT = sourceRT;
+        RenderTexture currentRT = flippedRT;
 
         // DownSample
-        // NOTE: ScreenCapture.CaptureScreenshotIntoRenderTexture writes rows in top-to-bottom screen order,
-        // which is the opposite of Unity's usual bottom-to-top RenderTexture UV convention. Flip vertically
-        // on the very first blit so every subsequent pass (and the final RawImage) sees correct orientation.
-        _blurMaterial.SetTextureScale("_MainTex", new Vector2(1f, -1f));
-        _blurMaterial.SetTextureOffset("_MainTex", new Vector2(0f, 1f));
-        Graphics.Blit(currentRT, _downRT[0], _blurMaterial, 0);
-        _blurMaterial.SetTextureScale("_MainTex", Vector2.one);
-        _blurMaterial.SetTextureOffset("_MainTex", Vector2.zero);
-        currentRT = _downRT[0];
-
-        for (int i = 1; i < blurIterations; i++)
+        for (int i = 0; i < blurIterations; i++)
         {
             Graphics.Blit(currentRT, _downRT[i], _blurMaterial, 0);
             currentRT = _downRT[i];
@@ -147,6 +143,7 @@ public class DualBlurController : MonoBehaviour
 
         // Release temporary RT
         RenderTexture.ReleaseTemporary(sourceRT);
+        RenderTexture.ReleaseTemporary(flippedRT);
 
         _isUpdating = false;
         _captureRoutine = null;
