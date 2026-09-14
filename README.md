@@ -41,6 +41,7 @@ Example:
 - To integrate postprocessing effect into the rendering pipeline: create a URP Renderer Feature that executes a custom render pass responsible for dispatching the compute shader at the appropriate stage of rendering.
 
 # Resources
+- [Post Processing & Render Graph | Unity Shader Code Basics 09](https://www.youtube.com/watch?v=26gbtRTokVo)
 - https://github.com/keijiro/URP-CameraEffectTemplate
 - https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/renderer-features/intro-to-scriptable-render-passes.html
 - https://docs.unity3d.com/6000.5/Documentation/Manual/urp/render-graph-write-render-pass.html
