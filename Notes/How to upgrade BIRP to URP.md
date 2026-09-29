@@ -12,5 +12,12 @@ If you create a new project using the Universal Render Pipeline or 3D (URP) temp
 2. Window > Package Manager: click the Packages drop-down to add URP to your project. Select the Unity Registry, followed by Universal RP. Click Download in the lower-right corner of the window if the URP package is not yet installed. click Install once it’s downloaded.
 3. create a URP Asset: right-click in the Project window and choose Create > Rendering > URP Asset (with Universal Renderer). Name the asset. 
 
+# Things to watch out for when upgrading from BIRP
+- URP heavily uses automated Shader Stripping based on your active URP Asset settings to reduce build sizes. This creates a massive problem for assets downloaded later via bundles
+- Adaptive Performance / platform tiers: While com.unity.adaptiveperformance 6.0 and Amazon's quarter-resolution texture path provide excellent out-of-the-box optimization for the Built-in Render Pipeline, they do not automatically map to the Universal Render Pipeline (URP) framework. Because URP decouples quality settings from the legacy pipeline, you must manually replicate and re-tune these scaling behaviors using URP Assets and Renderer Features.
+  - Built-in Pipeline: Relies on global quality settings and hardware-specific texture bias overrides that Adaptive Performance or Amazon's SDK can manipulate globally.
+  - URP: Uses discrete URP Asset Quality Tiers (e.g., Low, Medium, High) assigned per platform. Each tier controls its own render scale, texture resolution limits, and pipeline capabilities.
+  - com.unity.adaptiveperformance  6.0 and Amazon's quarter-resolution texture path are tuned for the Built-in pipeline's rendering settings; URP has its own per-platform Renderer/URP Asset quality tiers that need re-tuning for iOS/Android/Amazon separately.
+
 # TODO
 - Intro to the Universal Render Pipeline for advanced Unity creators (Unity 6 edition): 16 / 189
