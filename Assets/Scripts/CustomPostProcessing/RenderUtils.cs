@@ -9,7 +9,7 @@ public enum BlendingMode
     PremultipliedTransparency
 }
 
-public static class RenderingUtils
+public static class BlendingUtils
 {
     public static void SetMaterialBlendMode(BlendingMode blendingMode, Material material, int sourceBlendId, int destinationBlendId)
     {
