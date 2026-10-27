@@ -31,6 +31,14 @@ If you create a new project using the Universal Render Pipeline or 3D (URP) temp
 
 quick conversion solution: use a expensive ai model to figure out what needs changing in the project & use a cheap ai model to do the actual work. ask AI to identify step by step what is required for this particular project to convert to URP while maintaining visual parity, give it project context. break the ai plan into phased implementation. whenever you make changes make sure it looks the same. ask it to write something that help you diff before & after the migration.
 
+### URP Conversion notes
+- Camera stack: Whenever the scene changes the camera stack should change along with it. Grab the UI camera & add it to the camera stack. whenever the main camera changes, that camera needs to incorporate the UI camera into its camera stack.
+- Unity only gives you 1 point at which you can receive the camera opaque texture, otherwise it gets too expensive
+- SRP Batcher: it’s mainly a CPU side optimisation, but a little bit of GPU. It takes all draw calls, ones that have the same shader & shader variant it batches. It doesn’t care about materials in terms of what can be batched except for to do the materials that use the same shader & shader variant. it takes all the material properties of the objects that share the same shader & put it into buffers.  On the CPU side it can submit all those draw calls as.1 batch. On the gpu side the setup step between the draw calls get cheaper. There are still separate draw calls on the GPU. The set up that happens is swap a texture / mesh / buffer pointer. You don’t have to do the full property setup 1 more time you just change an index.
+
+Unity Project Settings > Preferences > Graphics > Advanced Properties: set to All Visible -> Display advanced properties in a URP Asset: 
+
 # TODO
 - Intro to the Universal Render Pipeline for advanced Unity creators (Unity 6 edition): 16 / 189
 - https://docs.unity.com/en-us/engine/6000.3/manual/render-pipelines/universal-render-pipeline/introduction/installing-and-configuring-urp/upgrading-from-birp
+- How to blit in URP: https://docs.unity.com/en-us/engine/6000.3/manual/render-pipelines/universal-render-pipeline/customizing-urp/blit-overview
