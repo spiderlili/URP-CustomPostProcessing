@@ -18,7 +18,12 @@ If you create a new project using the Universal Render Pipeline or 3D (URP) temp
 - Adaptive Performance / platform tiers: While com.unity.adaptiveperformance 6.0 and Amazon's quarter-resolution texture path provide excellent out-of-the-box optimization for the Built-in Render Pipeline, they do not automatically map to the Universal Render Pipeline (URP) framework. Because URP decouples quality settings from the legacy pipeline, you must manually replicate and re-tune these scaling behaviors using URP Assets and Renderer Features.
   - Built-in Pipeline: Relies on global quality settings and hardware-specific texture bias overrides that Adaptive Performance or Amazon's SDK can manipulate globally.
   - URP: Uses discrete URP Asset Quality Tiers (e.g., Low, Medium, High) assigned per platform. Each tier controls its own render scale, texture resolution limits, and pipeline capabilities.
-  - com.unity.adaptiveperformance  6.0 and Amazon's quarter-resolution texture path are tuned for the Built-in pipeline's rendering settings; URP has its own per-platform Renderer/URP Asset quality tiers that need re-tuning for iOS/Android/Amazon separately.
+  - com.unity.adaptiveperformance 6.0 and Amazon's quarter-resolution texture path are tuned for the Built-in pipeline's rendering settings; URP has its own per-platform Renderer/URP Asset quality tiers that need re-tuning for iOS/Android/Amazon separately.
+
+# Practical steps
+1. convert camera to camera stacking
+2. run Render Pipeline Converter to upgrade default materials automatically
 
 # TODO
 - Intro to the Universal Render Pipeline for advanced Unity creators (Unity 6 edition): 16 / 189
+- https://docs.unity.com/en-us/engine/6000.3/manual/render-pipelines/universal-render-pipeline/introduction/installing-and-configuring-urp/upgrading-from-birp
