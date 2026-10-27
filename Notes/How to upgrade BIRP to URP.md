@@ -24,7 +24,12 @@ If you create a new project using the Universal Render Pipeline or 3D (URP) temp
 1. convert camera to camera stacking
 2. run Render Pipeline Converter to upgrade default materials automatically
 3. upgrade custom sprite shader: copy the Sprite-Unlit-Default.shader file from unity urp package as a base, with Core2D.hlsl as a reference
-4. search for particle systems for the materials / particles that could not get coverted
+4. search for particle systems for the materials / particles that could not get coverted: As the legacy code includes logic that doubles the brightness, when switching to the Universal Render Pipeline/Particles/Unlit shader, the Base Color must be set twice as high as it was when using the Legacy Shader.
+5. write a script: different material properties for the texture, the base texture, you need to remember which texture was assigned & reassign it to the new material. when you select the new shader to rebind the texture that's something that's easier to do in a script.
+6. compare side by side the visual differences between shaders / vfx in different projects
+7. validate what you've already done
+
+quick conversion solution: use a expensive ai model to figure out what needs changing in the project & use a cheap ai model to do the actual work. ask AI to identify step by step what is required for this particular project to convert to URP while maintaining visual parity, give it project context. break the ai plan into phased implementation. whenever you make changes make sure it looks the same. ask it to write something that help you diff before & after the migration.
 
 # TODO
 - Intro to the Universal Render Pipeline for advanced Unity creators (Unity 6 edition): 16 / 189
