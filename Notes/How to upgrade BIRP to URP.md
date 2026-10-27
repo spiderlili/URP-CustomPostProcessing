@@ -24,6 +24,7 @@ If you create a new project using the Universal Render Pipeline or 3D (URP) temp
 1. convert camera to camera stacking
 2. run Render Pipeline Converter to upgrade default materials automatically
 3. upgrade custom sprite shader: copy the Sprite-Unlit-Default.shader file from unity urp package as a base, with Core2D.hlsl as a reference
+4. search for particle systems for the materials / particles that could not get coverted
 
 # TODO
 - Intro to the Universal Render Pipeline for advanced Unity creators (Unity 6 edition): 16 / 189
