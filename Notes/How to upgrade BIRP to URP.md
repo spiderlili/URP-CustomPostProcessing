@@ -13,6 +13,7 @@ If you create a new project using the Universal Render Pipeline or 3D (URP) temp
 3. create a URP Asset: right-click in the Project window and choose Create > Rendering > URP Asset (with Universal Renderer). Name the asset. 
 
 # Things to watch out for when upgrading from BIRP
+- Camera stack: Whenever the scene changes the camera stack should change along with it. Grab the UI camera & add it to the camera stack. whenever the main camera changes, that camera needs to incorporate the UI camera into its camera stack.
 - URP heavily uses automated Shader Stripping based on your active URP Asset settings to reduce build sizes. This creates a massive problem for assets downloaded later via bundles
 - Adaptive Performance / platform tiers: While com.unity.adaptiveperformance 6.0 and Amazon's quarter-resolution texture path provide excellent out-of-the-box optimization for the Built-in Render Pipeline, they do not automatically map to the Universal Render Pipeline (URP) framework. Because URP decouples quality settings from the legacy pipeline, you must manually replicate and re-tune these scaling behaviors using URP Assets and Renderer Features.
   - Built-in Pipeline: Relies on global quality settings and hardware-specific texture bias overrides that Adaptive Performance or Amazon's SDK can manipulate globally.
