@@ -75,3 +75,8 @@ Fix:
 - Release by array length: ReleaseRT now releases whatever is in the arrays and no longer reads blurIterations.
 
 Changing blurRange in the Inspector is safe. It's only read as a shader value at capture time. It never caused the error.
+
+### Vertex colour in URP
+`output.color = unity_SpriteColor;` use this instead of _Color
+
+`unity_SpriteColor` is important otherwise it will break batching if vertex color is used!
